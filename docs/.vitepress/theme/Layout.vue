@@ -1,12 +1,34 @@
 <script lang="ts" setup>
 import Giscus from "@giscus/vue";
 import DefaultTheme from "vitepress/theme";
-import { watch, nextTick, provide } from "vue";
+import { watch, nextTick, provide, onMounted, onUnmounted } from "vue";
 import { inBrowser, useData } from "vitepress";
 
 const { isDark, page } = useData();
 
 const { Layout } = DefaultTheme;
+
+function scrollToBibleReader(e: Event) {
+  const link = (e.target as HTMLElement).closest('a[href*="#bible-reader"]')
+  if (!link) return
+  e.preventDefault()
+  const el = document.querySelector('.bible-reader')
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+}
+
+onMounted(() => {
+  if (inBrowser) {
+    document.addEventListener('click', scrollToBibleReader)
+  }
+})
+
+onUnmounted(() => {
+  if (inBrowser) {
+    document.removeEventListener('click', scrollToBibleReader)
+  }
+})
 
 watch(isDark, (dark) => {
   if (!inBrowser) return;

@@ -7,7 +7,7 @@
           <div class="dock-icon">🏠</div>
         </a>
         <a href="/#bible-reader" class="dock-item" title="圣经阅读 Bible Reader">
-          <div class="dock-icon">📚</div>
+          <div class="dock-icon">�</div>
         </a>
         <button @click="toggleTheme" class="dock-item" :title="isDark ? '浅色模式' : '深色模式'">
           <div class="dock-icon">{{ isDark ? '☀️' : '🌙' }}</div>

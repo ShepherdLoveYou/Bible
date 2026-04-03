@@ -1,5 +1,5 @@
 <template>
-  <div class="bible-reader" id="bible-reader">
+  <div class="bible-reader">
     <div class="bible-reader-bg"></div>
     <div class="bible-reader-content">
       <!-- Header -->

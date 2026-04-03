@@ -2,7 +2,7 @@
 const props = defineProps({
   author: {
     type: String,
-    default: "XFeng",
+    default: "Mac",
   },
   date: {
     type: String,

@@ -6,15 +6,12 @@
         <a href="/" class="dock-item" title="首页">
           <div class="dock-icon">🏠</div>
         </a>
-        <a href="/blogs/XFeng" class="dock-item" title="博客">
+        <a href="/blogs/latest" class="dock-item" title="博客">
           <div class="dock-icon">📚</div>
         </a>
         <button @click="toggleTheme" class="dock-item" :title="isDark ? '浅色模式' : '深色模式'">
           <div class="dock-icon">{{ isDark ? '☀️' : '🌙' }}</div>
         </button>
-        <a href="https://github.com/wxfengg" class="dock-item" title="GitHub" target="_blank">
-          <div class="dock-icon">💻</div>
-        </a>
       </div>
     </div>
     

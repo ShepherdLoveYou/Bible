@@ -31,6 +31,10 @@ features:
     linkText: 查看详情
 ---
 
+<div class="mobile-bible-reader">
+  <BibleReader />
+</div>
+
 <div style="margin-top: 24px;">
   <AppleCard title="关于本站" subtitle="福音的光 Gospel Light" icon="✝️">
     本站致力于分享圣经真理、节期知识和信仰资源。愿神的话语成为你脚前的灯、路上的光。
@@ -40,3 +44,15 @@ features:
 <AppleCard>
   <VisitorPanel />
 </AppleCard>
+
+<style>
+.mobile-bible-reader {
+  display: none;
+  margin-top: 24px;
+}
+@media (max-width: 960px) {
+  .mobile-bible-reader {
+    display: block;
+  }
+}
+</style>

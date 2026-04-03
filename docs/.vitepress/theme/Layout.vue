@@ -125,8 +125,7 @@ provide('toggle-appearance', async ({ clientX: x, clientY: y }: MouseEvent) => {
 
 @media (max-width: 960px) {
   .hero-bible-reader {
-    max-width: 100%;
-    margin-top: 24px;
+    display: none;
   }
 }
 </style>

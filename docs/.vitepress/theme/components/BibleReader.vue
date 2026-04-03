@@ -107,9 +107,11 @@ const hasPrev = computed(() => !(selectedBookIndex.value === 0 && selectedChapte
 const hasNext = computed(() => !(selectedBookIndex.value === ALL_BOOKS.length - 1 && selectedChapter.value === chapterCount.value))
 
 function stripHtml(html) {
+  // Remove Strong's numbers <S>...</S> and footnotes <sup>...</sup> with their content
+  const cleaned = html.replace(/<S>\d+<\/S>/gi, '').replace(/<sup>[^<]*<\/sup>/gi, '')
   const tmp = document.createElement('div')
-  tmp.innerHTML = html
-  return tmp.textContent || tmp.innerText || ''
+  tmp.innerHTML = cleaned
+  return (tmp.textContent || tmp.innerText || '').replace(/\s+/g, ' ')
 }
 
 function onBookChange() {

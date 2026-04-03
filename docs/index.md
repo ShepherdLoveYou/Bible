@@ -34,12 +34,38 @@ features:
     linkText: 查看详情
 ---
 
-<div style="margin-top: 24px;">
-  <AppleCard title="关于本站" subtitle="福音的光 Gospel Light" icon="✝️">
-    本站致力于分享圣经真理、节期知识和信仰资源。愿神的话语成为你脚前的灯、路上的光。
-  </AppleCard>
+<div class="home-grid">
+  <div class="home-left">
+    <AppleCard title="关于本站" subtitle="福音的光 Gospel Light" icon="✝️">
+      本站致力于分享圣经真理、节期知识和信仰资源。愿神的话语成为你脚前的灯、路上的光。
+    </AppleCard>
+    <AppleCard>
+      <VisitorPanel />
+    </AppleCard>
+  </div>
+  <div class="home-right">
+    <BibleReader />
+  </div>
 </div>
 
-<AppleCard>
-  <VisitorPanel />
-</AppleCard>
+<style>
+.home-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 24px;
+}
+.home-left {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.home-right {
+  min-width: 0;
+}
+@media (max-width: 768px) {
+  .home-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>

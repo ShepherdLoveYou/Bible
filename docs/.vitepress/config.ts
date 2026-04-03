@@ -51,17 +51,17 @@ function generateBlogList(): BlogItem[] {
 const mdList = generateBlogList()
 
 export default defineConfig({
-  title: "Jing Jiang Blog",
-  titleTemplate: "个人博客",
-  description: "记录技术学习、项目实践与生活思考",
+  title: "福音的光 Gospel Light",
+  titleTemplate: "Gospel Light",
+  description: "將希望和真理帶到每一個角落 - Bringing hope and truth to every corner",
   ignoreDeadLinks: true,
   // header标签里面插入的内容
-  head: [["link", { rel: "icon", href: "/flag.svg" }]],
+  head: [["link", { rel: "icon", href: "/cross.svg" }]],
   //启用深色模式
   appearance: "dark",
   themeConfig: {
     // 网站的logo
-    logo: "/avatar_ac.png",
+    logo: "/cross.svg",
     // 文章右侧大纲目录
     outline: {
       level: [2, 6],
@@ -83,8 +83,8 @@ export default defineConfig({
     // },
     // 页脚
     footer: {
-      message: "Released under the MIT License.",
-      copyright: "Copyright © 2026 Jing Jiang",
+      message: "将希望和真理带到每一个角落",
+      copyright: "Copyright © 2026 Gospel Light ✝",
     },
     // 文档的最后更新时间
     lastUpdatedText: "最后更新于",
@@ -99,13 +99,13 @@ export default defineConfig({
     // 导航栏按钮
     nav: [
       { text: "首页", link: "/" },
-      { text: "博客", link: mdList[0].link },
+      { text: "文章", link: mdList[0].link },
       { text: "关于", link: "/about" },
     ],
     // 侧边栏
     sidebar: [
       {
-        text: "博客",
+        text: "文章",
         items: mdList,
       },
     ],

@@ -92,20 +92,86 @@ export interface BibleVersion {
   name: string
 }
 
-export const CHINESE_VERSIONS: BibleVersion[] = [
-  { id: 'CUNPS', name: '新标点和合本(简体)' },
-  { id: 'CUV', name: '和合本(繁體)' },
-  { id: 'ChiSB', name: '思高圣经' },
+/** 按语言分组的版本列表 (数据来自 thiagobodruk/bible) */
+export interface LanguageGroup {
+  label: string
+  versions: BibleVersion[]
+}
+
+export const VERSION_GROUPS: LanguageGroup[] = [
+  {
+    label: '中文 Chinese',
+    versions: [
+      { id: 'zh_cuv', name: '和合本 (CUV)' },
+      { id: 'zh_ncv', name: '新译本 (NCV)' },
+    ],
+  },
+  {
+    label: 'English',
+    versions: [
+      { id: 'en_kjv', name: 'KJV' },
+      { id: 'en_bbe', name: 'BBE' },
+    ],
+  },
+  {
+    label: '한국어 Korean',
+    versions: [{ id: 'ko_ko', name: '한국어' }],
+  },
+  {
+    label: 'Español Spanish',
+    versions: [{ id: 'es_rvr', name: 'Reina Valera' }],
+  },
+  {
+    label: 'Français French',
+    versions: [{ id: 'fr_apee', name: "Bible de l'Épée" }],
+  },
+  {
+    label: 'Deutsch German',
+    versions: [{ id: 'de_schlachter', name: 'Schlachter' }],
+  },
+  {
+    label: 'Português Portuguese',
+    versions: [
+      { id: 'pt_nvi', name: 'NVI' },
+      { id: 'pt_aa', name: 'Almeida Revisada' },
+      { id: 'pt_acf', name: 'Almeida Corrigida' },
+    ],
+  },
+  {
+    label: 'Русский Russian',
+    versions: [{ id: 'ru_synodal', name: 'Синодальный' }],
+  },
+  {
+    label: 'العربية Arabic',
+    versions: [{ id: 'ar_svd', name: 'Arabic Bible' }],
+  },
+  {
+    label: 'Ελληνικά Greek',
+    versions: [{ id: 'el_greek', name: 'Modern Greek' }],
+  },
+  {
+    label: 'Tiếng Việt Vietnamese',
+    versions: [{ id: 'vi_vietnamese', name: 'Tiếng Việt' }],
+  },
+  {
+    label: 'Suomi Finnish',
+    versions: [
+      { id: 'fi_finnish', name: 'Finnish Bible' },
+      { id: 'fi_pr', name: 'Pyhä Raamattu' },
+    ],
+  },
+  {
+    label: 'Română Romanian',
+    versions: [{ id: 'ro_cornilescu', name: 'Cornilescu' }],
+  },
+  {
+    label: 'Esperanto',
+    versions: [{ id: 'eo_esperanto', name: 'Esperanto' }],
+  },
 ]
 
-export const ENGLISH_VERSIONS: BibleVersion[] = [
-  { id: 'KJV', name: 'KJV' },
-  { id: 'ESV', name: 'ESV' },
-  { id: 'NIV', name: 'NIV (1984)' },
-  { id: 'NKJV', name: 'NKJV' },
-  { id: 'NLT', name: 'NLT' },
-  { id: 'NASB', name: 'NASB' },
-  { id: 'WEB', name: 'WEB' },
-]
+/** All version IDs (flat) */
+export const ALL_VERSIONS = VERSION_GROUPS.flatMap(g => g.versions)
 
-export const CHINESE_VERSION_IDS = new Set(CHINESE_VERSIONS.map(v => v.id))
+/** Chinese version IDs for UI language detection */
+export const CHINESE_VERSION_IDS = new Set(['zh_cuv', 'zh_ncv'])

@@ -1,17 +1,21 @@
 import { ref, computed, nextTick } from 'vue'
-import { ALL_BOOKS, OT_BOOKS, NT_BOOKS, CHINESE_VERSIONS, ENGLISH_VERSIONS, CHINESE_VERSION_IDS } from '../components/bible-data'
+import { withBase } from 'vitepress'
+import { ALL_BOOKS, OT_BOOKS, NT_BOOKS, VERSION_GROUPS, CHINESE_VERSION_IDS } from '../components/bible-data'
 
 /**
  * 圣经阅读器核心逻辑
- * 管理版本选择、书卷导航、章节切换、经文加载
+ * 使用本地 JSON 数据（来自 thiagobodruk/bible），按书卷懒加载并缓存
  */
 export function useBibleReader() {
-  const selectedVersion = ref('CUNPS')
+  const selectedVersion = ref('zh_cuv')
   const selectedBookIndex = ref(42) // 约翰福音 John
   const selectedChapter = ref(1)
   const verses = ref([])
   const loading = ref(false)
   const error = ref('')
+
+  // Per-book cache: "zh_cuv-43" → [[ch1_verses], [ch2_verses], ...]
+  const bookCache = new Map()
 
   const currentBook = computed(() => ALL_BOOKS[selectedBookIndex.value])
   const chapterCount = computed(() => currentBook.value?.chapters || 1)
@@ -29,13 +33,6 @@ export function useBibleReader() {
 
   function chapterLabel(ch) {
     return isChinese.value ? `第 ${ch} 章` : `Ch. ${ch}`
-  }
-
-  function stripHtml(html) {
-    const cleaned = html.replace(/<S>\d+<\/S>/gi, '').replace(/<sup>[^<]*<\/sup>/gi, '')
-    const tmp = document.createElement('div')
-    tmp.innerHTML = cleaned
-    return (tmp.textContent || tmp.innerText || '').replace(/\s+/g, ' ')
   }
 
   function onBookChange() {
@@ -68,22 +65,31 @@ export function useBibleReader() {
     if (!book) return
 
     const bookId = selectedBookIndex.value + 1
+    const version = selectedVersion.value
+    const cacheKey = `${version}-${bookId}`
+
     loading.value = true
     error.value = ''
     verses.value = []
 
     try {
-      const resp = await fetch(`https://bolls.life/get-text/${selectedVersion.value}/${bookId}/${selectedChapter.value}/`)
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`)
-      const data = await resp.json()
-      if (Array.isArray(data) && data.length > 0) {
-        verses.value = data.map(v => ({
-          verse: v.verse,
-          text: stripHtml(v.text).trim()
-        }))
-      } else {
-        throw new Error('无法获取经文内容')
+      if (!bookCache.has(cacheKey)) {
+        const resp = await fetch(withBase(`/bible/${version}/${bookId}.json`))
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`)
+        bookCache.set(cacheKey, await resp.json())
       }
+
+      const chapters = bookCache.get(cacheKey)
+      const chapterData = chapters[selectedChapter.value - 1]
+
+      if (!chapterData || chapterData.length === 0) {
+        throw new Error('Chapter not found')
+      }
+
+      verses.value = chapterData.map((text, i) => ({
+        verse: i + 1,
+        text: text
+      }))
     } catch {
       error.value = '加载失败，请稍后重试 Failed to load, please try again'
     } finally {
@@ -99,8 +105,7 @@ export function useBibleReader() {
     // Data
     otBooks: OT_BOOKS,
     ntBooks: NT_BOOKS,
-    chineseVersions: CHINESE_VERSIONS,
-    englishVersions: ENGLISH_VERSIONS,
+    versionGroups: VERSION_GROUPS,
     // State
     selectedVersion,
     selectedBookIndex,

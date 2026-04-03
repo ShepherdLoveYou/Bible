@@ -16,11 +16,8 @@
         <div class="bible-nav-field">
           <label class="bible-label">语言与版本 Language & Version</label>
           <select v-model="selectedVersion" class="bible-select version-select" @change="() => loadChapter(textContainer)">
-            <optgroup label="中文 Chinese">
-              <option v-for="v in chineseVersions" :key="v.id" :value="v.id">{{ v.name }}</option>
-            </optgroup>
-            <optgroup label="英文 English">
-              <option v-for="v in englishVersions" :key="v.id" :value="v.id">{{ v.name }}</option>
+            <optgroup v-for="group in versionGroups" :key="group.label" :label="group.label">
+              <option v-for="v in group.versions" :key="v.id" :value="v.id">{{ v.name }}</option>
             </optgroup>
           </select>
         </div>
@@ -93,8 +90,7 @@
     :nt-label="ntLabel"
     :ot-books="otBooks"
     :nt-books="ntBooks"
-    :chinese-versions="chineseVersions"
-    :english-versions="englishVersions"
+    :version-groups="versionGroups"
     :book-display-name="bookDisplayName"
     :chapter-label="chapterLabel"
     :on-book-change="onBookChange"
@@ -113,7 +109,7 @@ import { ref, onMounted } from 'vue'
 import { useBibleReader } from '../composables/useBibleReader'
 
 const {
-  otBooks, ntBooks, chineseVersions, englishVersions,
+  otBooks, ntBooks, versionGroups,
   selectedVersion, selectedBookIndex, selectedChapter,
   verses, loading, error,
   currentBook, chapterCount, hasPrev, hasNext,

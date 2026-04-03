@@ -41,11 +41,8 @@
         <!-- Selector Row -->
         <div class="fs-selector-row">
           <select v-model="selectedVersion" class="fs-select" @change="loadChapter">
-            <optgroup label="中文 Chinese">
-              <option v-for="v in chineseVersions" :key="v.id" :value="v.id">{{ v.name }}</option>
-            </optgroup>
-            <optgroup label="英文 English">
-              <option v-for="v in englishVersions" :key="v.id" :value="v.id">{{ v.name }}</option>
+            <optgroup v-for="group in versionGroups" :key="group.label" :label="group.label">
+              <option v-for="v in group.versions" :key="v.id" :value="v.id">{{ v.name }}</option>
             </optgroup>
           </select>
           <select v-model="selectedBookIndex" class="fs-select fs-book-select" @change="onBookChange">
@@ -136,8 +133,7 @@ const props = defineProps({
   ntLabel: String,
   otBooks: Array,
   ntBooks: Array,
-  chineseVersions: Array,
-  englishVersions: Array,
+  versionGroups: Array,
   bookDisplayName: Function,
   chapterLabel: Function,
   // Navigation methods

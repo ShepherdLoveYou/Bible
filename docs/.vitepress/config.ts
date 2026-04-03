@@ -51,12 +51,12 @@ function generateBlogList(): BlogItem[] {
 const mdList = generateBlogList()
 
 export default defineConfig({
-  title: "XFeng's Blog",
-  titleTemplate: "博客~",
-  description: "A VitePress Site",
+  title: "Jing Jiang Blog",
+  titleTemplate: "个人博客",
+  description: "记录技术学习、项目实践与生活思考",
   ignoreDeadLinks: true,
   // header标签里面插入的内容
-  head: [["link", { rel: "icon", href: "/xfeng-blog/flag.svg" }]],
+  head: [["link", { rel: "icon", href: "/flag.svg" }]],
   //启用深色模式
   appearance: "dark",
   themeConfig: {
@@ -84,7 +84,7 @@ export default defineConfig({
     // 页脚
     footer: {
       message: "Released under the MIT License.",
-      copyright: "Copyright © BY XFeng | wxfengg@gmail.com",
+      copyright: "Copyright © 2026 Jing Jiang",
     },
     // 文档的最后更新时间
     lastUpdatedText: "最后更新于",
@@ -100,7 +100,7 @@ export default defineConfig({
     nav: [
       { text: "首页", link: "/" },
       { text: "博客", link: mdList[0].link },
-      // { text: "组件展示", link: "/apple-components" },
+      { text: "关于", link: "/about" },
     ],
     // 侧边栏
     sidebar: [
@@ -110,16 +110,17 @@ export default defineConfig({
       },
     ],
     // 社交链接
-    socialLinks: [{ icon: "github", link: "https://github.com/wxfengg" }],
+    socialLinks: [{ icon: "github", link: "https://github.com/ShepherdLoveYou" }],
     // 404找不到页面
     notFound: {
       title: "抱歉，您访问的资源不存在",
-      quote: "您好，您访问的资源不存在或已被删除。如果您有什么需求或建议， 请联系我。 邮箱：wxfengg@gmail.com",
+      quote: "该页面可能已被移动或删除。你可以返回首页继续浏览。",
       linkText: "返回首页",
     },
   },
   // 部署的时候需要注意该参数避免样式丢失
-  base: "/xfeng-blog/",
+  // 本地默认 /，部署到子路径时可通过 BLOG_BASE 覆盖，例如 /my-blog/
+  base: process.env.BLOG_BASE || "/",
 
   // 构建时自动将首页 hero 按钮链接指向最新博客
   transformPageData(pageData) {

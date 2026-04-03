@@ -72,3 +72,18 @@
 - 遵循毛玻璃设计模式
 - 确保所有屏幕尺寸的响应式设计
 - 支持明暗两种主题
+
+## 部署到 GitHub Pages（GitHub Actions）
+
+已内置自动部署工作流：`.github/workflows/deploy.yml`。
+
+### 一次性设置
+1. 将仓库推送到 GitHub（默认分支为 `main`）。
+2. 打开仓库 `Settings` -> `Pages`。
+3. 在 `Build and deployment` 中将 `Source` 设为 `GitHub Actions`。
+
+### 后续发布
+- 每次推送到 `main` 分支都会自动构建并部署。
+- 工作流会自动设置 `BLOG_BASE`：
+  - 如果仓库是 `<username>.github.io`，则使用 `/`
+  - 其他仓库使用 `/<repo-name>/`

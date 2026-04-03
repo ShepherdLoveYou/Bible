@@ -5,46 +5,50 @@
       <!-- Header -->
       <div class="bible-reader-header">
         <span class="bible-reader-icon">📖</span>
-        <h3 class="bible-reader-title">圣经阅读</h3>
+        <h3 class="bible-reader-title">圣经阅读 Bible Reader</h3>
       </div>
 
       <!-- Version Selector -->
       <div class="bible-nav">
-        <div class="bible-nav-row">
+        <div class="bible-nav-field">
+          <label class="bible-label">语言与版本 Language & Version</label>
           <select v-model="selectedVersion" class="bible-select version-select" @change="loadChapter">
-            <optgroup label="中文">
+            <optgroup label="中文 Chinese">
               <option v-for="v in chineseVersions" :key="v.id" :value="v.id">{{ v.name }}</option>
             </optgroup>
-            <optgroup label="English">
+            <optgroup label="英文 English">
               <option v-for="v in englishVersions" :key="v.id" :value="v.id">{{ v.name }}</option>
             </optgroup>
           </select>
         </div>
 
         <!-- Book & Chapter -->
-        <div class="bible-nav-row">
-          <select v-model="selectedBookIndex" class="bible-select book-select" @change="onBookChange">
-            <optgroup label="旧约 Old Testament">
-              <option v-for="(book, i) in otBooks" :key="book.osis" :value="i">
-                {{ isChinese ? book.name.zh : book.name.en }}
+        <div class="bible-nav-field">
+          <label class="bible-label">书卷与章节 Book & Chapter</label>
+          <div class="bible-nav-row">
+            <select v-model="selectedBookIndex" class="bible-select book-select" @change="onBookChange">
+              <optgroup label="旧约 Old Testament">
+                <option v-for="(book, i) in otBooks" :key="book.osis" :value="i">
+                  {{ book.name.zh }} {{ book.name.en }}
+                </option>
+              </optgroup>
+              <optgroup label="新约 New Testament">
+                <option v-for="(book, i) in ntBooks" :key="book.osis" :value="i + otBooks.length">
+                  {{ book.name.zh }} {{ book.name.en }}
+                </option>
+              </optgroup>
+            </select>
+            <select v-model="selectedChapter" class="bible-select chapter-select" @change="loadChapter">
+              <option v-for="ch in chapterCount" :key="ch" :value="ch">
+                第 {{ ch }} 章 Ch.{{ ch }}
               </option>
-            </optgroup>
-            <optgroup label="新约 New Testament">
-              <option v-for="(book, i) in ntBooks" :key="book.osis" :value="i + otBooks.length">
-                {{ isChinese ? book.name.zh : book.name.en }}
-              </option>
-            </optgroup>
-          </select>
-          <select v-model="selectedChapter" class="bible-select chapter-select" @change="loadChapter">
-            <option v-for="ch in chapterCount" :key="ch" :value="ch">
-              {{ isChinese ? `第 ${ch} 章` : `Ch. ${ch}` }}
-            </option>
-          </select>
+            </select>
+          </div>
         </div>
         <div class="bible-nav-actions">
-          <button class="nav-btn" :disabled="!hasPrev" @click="prevChapter" title="上一章">‹</button>
-          <span class="chapter-label">{{ currentBook?.name.en }} {{ selectedChapter }}</span>
-          <button class="nav-btn" :disabled="!hasNext" @click="nextChapter" title="下一章">›</button>
+          <button class="nav-btn" :disabled="!hasPrev" @click="prevChapter" title="上一章 Previous">‹</button>
+          <span class="chapter-label">{{ currentBook?.name.zh }} {{ currentBook?.name.en }} {{ selectedChapter }}</span>
+          <button class="nav-btn" :disabled="!hasNext" @click="nextChapter" title="下一章 Next">›</button>
         </div>
       </div>
 
@@ -52,11 +56,11 @@
       <div class="bible-text-container" ref="textContainer">
         <div v-if="loading" class="bible-loading">
           <div class="loading-spinner"></div>
-          <span>加载中...</span>
+          <span>加载中 Loading...</span>
         </div>
         <div v-else-if="error" class="bible-error">
           <p>{{ error }}</p>
-          <button class="retry-btn" @click="loadChapter">重试</button>
+          <button class="retry-btn" @click="loadChapter">重试 Retry</button>
         </div>
         <div v-else class="bible-text">
           <div v-for="verse in verses" :key="verse.verse" class="bible-verse">
@@ -100,7 +104,6 @@ const loading = ref(false)
 const error = ref('')
 const textContainer = ref(null)
 
-const isChinese = computed(() => chineseVersions.some(v => v.id === selectedVersion.value))
 const currentBook = computed(() => ALL_BOOKS[selectedBookIndex.value])
 const chapterCount = computed(() => currentBook.value?.chapters || 1)
 const hasPrev = computed(() => !(selectedBookIndex.value === 0 && selectedChapter.value === 1))
@@ -162,7 +165,7 @@ async function loadChapter() {
       throw new Error('无法获取经文内容')
     }
   } catch (e) {
-    error.value = '加载失败，请稍后重试'
+    error.value = '加载失败，请稍后重试 Failed to load, please try again'
   } finally {
     loading.value = false
     await nextTick()
@@ -246,10 +249,22 @@ onMounted(() => {
   margin-bottom: 16px;
 }
 
+.bible-nav-field {
+  margin-bottom: 10px;
+}
+
+.bible-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--vp-c-text-2);
+  margin-bottom: 6px;
+  letter-spacing: 0.02em;
+}
+
 .bible-nav-row {
   display: flex;
   gap: 8px;
-  margin-bottom: 10px;
 }
 
 .bible-select {

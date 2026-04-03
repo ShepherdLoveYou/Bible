@@ -4,7 +4,7 @@
 
 # 福音的光 Gospel Light
 
-一个基于 VitePress 构建的福音主题博客，致力于分享圣经真理、节期知识和信仰资源。采用 Apple 风格设计系统。
+一个基于 VitePress 构建的福音博客，致力于分享圣经真理、节期知识和信仰资源。采用 Apple 风格设计系统。
 
 **在线访问**: <https://shepherdloveyou.github.io/Bible/>
 
@@ -27,7 +27,8 @@
 
 ## 功能特性
 
-- **在线圣经阅读器** -- 多语言（中文 / 英文）、10 个版本（CUNPS、CUV、ChiSB、KJV、ESV、NIV、NKJV、NLT、NASB、WEB），全屏阅读模式，支持搜索、字体缩放和键盘快捷键
+- **在线圣经阅读器** -- 19 个版本，涵盖 15 种语言（中文/English/한국어/Español/Français/Deutsch/Português/Русский/العربية/Ελληνικά/Tiếng Việt/Suomi/Română/Esperanto），完全离线本地数据，全屏阅读模式，支持搜索、字体缩放和键盘快捷键
+- **多语言 UI** -- 书卷名、章节标签、旧约/新约分组名自动切换为所选圣经版本对应的语言（14 种语言，默认回退英文）
 - **Apple 风格设计系统** -- 毛玻璃卡片、光球背景动画、View Transition API 主题切换、悬浮按钮、移动端 Dock 导航
 - **自动博客管理** -- 将 `.md` 文件放入 `docs/blogs/`，即可自动出现在侧边栏，按 Git 提交时间排序（最新优先）
 - **Giscus 评论** -- 基于 GitHub Discussions 的评论系统
@@ -45,7 +46,7 @@
 | TypeScript | 配置与类型定义 |
 | [Giscus](https://giscus.app/) | 评论系统 |
 | [Busuanzi](https://busuanzi.ibruce.info/) | 访客统计 |
-| [Bolls.life API](https://bolls.life/) | 圣经经文数据源 |
+| [thiagobodruk/bible](https://github.com/thiagobodruk/bible) | 圣经经文数据源（本地 JSON，19 个版本） |
 
 ---
 
@@ -65,7 +66,12 @@ docs/
     resource-share.md
     sunday-school-genesis.md
     assets/                         # 文章图片
-  public/                           # 静态资源（favicon、SVG 图标等）
+  public/
+    bible/                          # 本地圣经数据（19 个版本 × 66 卷）
+      zh_cuv/1.json … 66.json      # 如：和合本
+      en_kjv/1.json … 66.json      # 如：King James Version
+      …                             # （19 个版本目录）
+    favicon.ico, bible.svg, …      # 静态资源
   .vitepress/
     config.ts                       # VitePress 配置（导航、侧边栏、base 路径）
     utils/
@@ -82,10 +88,9 @@ docs/
       components/
         BibleReader.vue             # 圣经阅读器组件（紧凑卡片视图）
         BibleFullscreen.vue         # 全屏阅读模式（Teleport 到 body）
-        bible-data.ts               # 66 卷书数据 + 版本定义
+        bible-data.ts               # 66 卷书 × 14 种语言 + 版本定义
         BlogHead.vue                # 文章头部（作者、日期）
         VisitorPanel.vue            # 访客统计面板
-        backTop.vue                 # 返回顶部按钮
         AppleBackground.vue         # 光球动画背景
         AppleButton.vue             # 样式按钮
         AppleCard.vue               # 毛玻璃卡片
@@ -98,6 +103,8 @@ docs/
         AppleSearch.vue             # 搜索界面
         AppleTabs.vue               # 标签页组件
         AppleTooltip.vue            # 工具提示
+scripts/
+  download-bible.mjs                # 一次性下载圣经数据脚本
 .github/
   workflows/
     deploy.yml                      # GitHub Pages CI/CD 流水线
@@ -121,10 +128,10 @@ Layout.vue
   +-- [所有组件]                （自动注册，在模板插槽中使用）
 
 BibleReader.vue
-  +-- useBibleReader.js        （版本/书卷/章节状态 + API 调用）
+  +-- useBibleReader.js        （版本/书卷/章节状态 + 本地 JSON 加载）
   +-- BibleFullscreen.vue      （全屏子组件）
         +-- useBibleSearch.js  （搜索状态 + 文本高亮）
-  +-- bible-data.ts            （静态书卷数据 + 版本元数据）
+  +-- bible-data.ts            （多语言书卷名 + 版本元数据）
 ```
 
 ### 组合式函数 (Composables)
@@ -133,7 +140,7 @@ BibleReader.vue
 
 | Composable | 职责 | 输入 | 主要导出 |
 |---|---|---|---|
-| `useBibleReader()` | 圣经阅读核心逻辑 | 无 | `selectedVersion`, `selectedBookIndex`, `selectedChapter`, `verses`, `loading`, `error`, `isChinese`, `loadChapter()`, `prevChapter()`, `nextChapter()` |
+| `useBibleReader()` | 圣经阅读核心逻辑 | 无 | `selectedVersion`, `verses`, `loading`, `currentLang`, `bookDisplayName()`, `chapterLabel()`, `loadChapter()`, `prevChapter()`, `nextChapter()` |
 | `useBibleSearch(verses)` | 全屏文本搜索 | `Ref<Array>` 经文数组 | `searchQuery`, `searchMatches`, `toggleSearch()`, `onSearch()`, `highlightText()`, `isSearchHighlight()` |
 | `useViewTransition()` | 主题切换波纹动画 | 无 | `isDark`（同时通过 Vue inject 提供 `toggle-appearance`） |
 | `useNotification()` | 全局通知管理 | 无 | `$notify.show()`, `$notify.success()`, `$notify.error()` 等 |
@@ -171,18 +178,20 @@ for (const path in modules) {
         v
 useBibleReader.js
   - 更新响应式引用（selectedVersion, selectedBookIndex, selectedChapter）
-  - 调用 bolls.life API: GET /get-chapter/{version}/{bookIndex}/{chapter}
-  - 填充 verses 引用
+  - 通过 VERSION_LANG_MAP 确定当前语言
+  - 加载本地 JSON: /bible/{version}/{bookId}.json
+  - 缓存整卷书（Map key: "version-bookId"）
+  - 从缓存中提取章节，填充 verses 引用
         |
         v
 BibleReader.vue（紧凑视图）
-  - 渲染经文列表、导航控件
+  - 渲染经文列表（显示对应语言的书卷/章节名）
   - 点击"全屏"打开 BibleFullscreen
         |
         v
 BibleFullscreen.vue（Teleport 到 body）
   - 通过 props 接收状态，通过 emit 返回更新
-  - 初始化 useBibleSearch(verses) 用于搜索覆盖层
+  - 初始化 useBibleSearch(computed verses ref) 用于搜索覆盖层
   - 支持键盘快捷键：Esc（关闭）、Left/Right（导航）、Ctrl+F（搜索）
 ```
 
@@ -333,52 +342,55 @@ const { state } = useMyFeature()
 
 ## 圣经阅读器
 
-圣经阅读器嵌入在首页 Hero 区域（桌面端）和功能区域上方（移动端）。
+圣经阅读器嵌入在首页 Hero 区域（桌面端）和功能区域上方（移动端）。所有数据均为本地数据，运行时无需外部 API 调用。
 
-### 支持的版本
+### 支持的版本（19 个版本，15 种语言）
 
-**中文（3 个）**：
-- CUNPS -- 新标点和合本（简体）
-- CUV -- 和合本（繁体）
-- ChiSB -- 思高圣经
+| 语言 | 版本 |
+|---|---|
+| 中文 Chinese | 和合本 (CUV)、新译本 (NCV) |
+| English | KJV、BBE |
+| 한국어 Korean | 한국어 |
+| Español Spanish | Reina Valera |
+| Français French | Bible de l'Épée |
+| Deutsch German | Schlachter |
+| Português Portuguese | NVI、Almeida Revisada、Almeida Corrigida |
+| Русский Russian | Синодальный |
+| العربية Arabic | Arabic Bible |
+| Ελληνικά Greek | Modern Greek |
+| Tiếng Việt Vietnamese | Tiếng Việt |
+| Suomi Finnish | Finnish Bible、Pyhä Raamattu |
+| Română Romanian | Cornilescu |
+| Esperanto | Esperanto |
 
-**英文（7 个）**：
-- KJV -- King James Version
-- ESV -- English Standard Version
-- NIV -- New International Version
-- NKJV -- New King James Version
-- NLT -- New Living Translation
-- NASB -- New American Standard Bible
-- WEB -- World English Bible
+### 多语言书卷名
+
+书卷名、章节标签（如“第 1 章”、“Ch. 1”、“1장”、“Capítulo 1”）、旧约/新约分组名称均显示为所选圣经版本对应的语言。若该语言不可用，则回退为英文。
 
 ### 导航
 
 - 66 卷书按旧约（39 卷）和新约（27 卷）分组
 - 书卷名称根据所选版本显示中文或英文
 - 通过下拉框或上一章/下一章按钮导航章节
-- 默认：CUNPS，约翰福音，第一章
+- 默认：zh_cuv（和合本），约翰福音，第一章
 
 ### 全屏模式
 
 - 通过紧凑阅读器上的扩展按钮进入
-- 键盘快捷键：
-  - `Esc` -- 关闭全屏
-  - `Left Arrow` -- 上一章
-  - `Right Arrow` -- 下一章
-  - `Ctrl+F` / `Cmd+F` -- 切换搜索
+- 键盘快捷键：`Esc`（关闭）、`←`/`→`（切换章节）、`Ctrl+F`（搜索）
 - 字体大小可从 12px 到 32px 调节
 - Page Up / Page Down 用于滚动
 - 搜索高亮匹配经文，支持在结果间导航
 
-### API
+### 本地数据
 
-经文数据来自 [Bolls.life](https://bolls.life/) 公共 API：
+圣经经文数据来源于 [thiagobodruk/bible](https://github.com/thiagobodruk/bible)，存储为按书卷分割的 JSON 文件，路径为 `docs/public/bible/{version}/{bookId}.json`。每个文件包含二维数组：`chapters[chapterIndex][verseIndex] = 经文文本`。
 
+重新下载或更新数据：
+
+```bash
+node scripts/download-bible.mjs
 ```
-GET https://bolls.life/get-chapter/{version}/{bookIndex}/{chapter}/
-```
-
-返回经文对象数组：`{ pk, verse, text }`。
 
 ---
 
@@ -415,9 +427,10 @@ BLOG_BASE=/my-blog/ pnpm build
 
 | 命令 | 说明 |
 |---|---|
-| `pnpm dev` | 启动开发服务器，支持热重载（自动打开浏览器） |
+| `pnpm dev` | 启动开发服务器，支持热重载 |
 | `pnpm build` | 构建生产站点到 `docs/.vitepress/dist/` |
-| `pnpm preview` | 本地预览生产构建产物 |
+| `pnpm preview` | 本地预览构建产物 |
+| `node scripts/download-bible.mjs` | 从 thiagobodruk/bible 重新下载圣经数据 |
 
 ---
 

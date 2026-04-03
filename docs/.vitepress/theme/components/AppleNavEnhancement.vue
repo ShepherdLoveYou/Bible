@@ -26,7 +26,6 @@ import { useData } from 'vitepress'
 
 const { isDark } = useData()
 
-const scrollProgress = ref(0)
 const showDock = ref(true)
 const isMobile = ref(false)
 const lastScrollY = ref(0)
@@ -35,12 +34,8 @@ const toggleTheme = () => {
   isDark.value = !isDark.value
 }
 
-const updateScrollProgress = () => {
+const handleScroll = () => {
   const scrollTop = window.pageYOffset || document.documentElement.scrollTop
-  const docHeight = document.documentElement.scrollHeight - window.innerHeight
-  scrollProgress.value = (scrollTop / docHeight) * 100
-  
-  // Hide/show dock based on scroll direction
   if (scrollTop > lastScrollY.value && scrollTop > 100) {
     showDock.value = false
   } else {
@@ -54,13 +49,13 @@ const checkMobile = () => {
 }
 
 onMounted(() => {
-  // window.addEventListener('scroll', updateScrollProgress)
+  window.addEventListener('scroll', handleScroll, { passive: true })
   window.addEventListener('resize', checkMobile)
   checkMobile()
 })
 
 onUnmounted(() => {
-  // window.removeEventListener('scroll', updateScrollProgress)
+  window.removeEventListener('scroll', handleScroll)
   window.removeEventListener('resize', checkMobile)
 })
 </script>

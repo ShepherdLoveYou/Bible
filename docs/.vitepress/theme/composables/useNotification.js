@@ -49,7 +49,8 @@ class NotificationManager {
     })
 
     app.mount(notificationDiv)
-    document.body.appendChild(notificationDiv)
+    if (!this.container) this.initContainer()
+    this.container.appendChild(notificationDiv)
 
     return id
   }

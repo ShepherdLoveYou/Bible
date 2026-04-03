@@ -25,8 +25,15 @@ import { ref, onMounted, onUnmounted } from 'vue'
 
 const isVisible = ref(false)
 
+let ticking = false
 const handleScroll = () => {
-  isVisible.value = window.scrollY > 300
+  if (!ticking) {
+    requestAnimationFrame(() => {
+      isVisible.value = window.scrollY > 300
+      ticking = false
+    })
+    ticking = true
+  }
 }
 
 const scrollToTop = () => {
@@ -37,7 +44,7 @@ const scrollToTop = () => {
 }
 
 onMounted(() => {
-  window.addEventListener('scroll', handleScroll)
+  window.addEventListener('scroll', handleScroll, { passive: true })
 })
 
 onUnmounted(() => {

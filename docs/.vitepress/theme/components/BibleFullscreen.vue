@@ -112,7 +112,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useBibleSearch } from '../composables/useBibleSearch'
 
 const props = defineProps({
@@ -157,16 +157,17 @@ watch(selectedVersion, v => emit('update:selectedVersion', v))
 watch(selectedBookIndex, v => emit('update:selectedBookIndex', v))
 watch(selectedChapter, v => emit('update:selectedChapter', v))
 
-// Search
+// Search — pass a computed ref so useBibleSearch always sees latest verses
+const versesRef = computed(() => props.verses || [])
 const {
   showSearch, searchQuery, searchMatches, searchMatchIndex,
   searchInput, activeMatchEl,
   toggleSearch, onSearch, nextSearchMatch, prevSearchMatch,
   isSearchHighlight, highlightText,
-} = useBibleSearch(props.verses ? { value: props.verses } : ref([]))
+} = useBibleSearch(versesRef)
 
-// Re-init search source when verses change
-watch(() => props.verses, () => {
+// Re-run search when verses change (e.g. chapter/version switch)
+watch(versesRef, () => {
   if (searchQuery.value) onSearch()
 })
 

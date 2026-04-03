@@ -1,6 +1,6 @@
 import { ref, computed, nextTick } from 'vue'
 import { withBase } from 'vitepress'
-import { ALL_BOOKS, OT_BOOKS, NT_BOOKS, VERSION_GROUPS, CHINESE_VERSION_IDS } from '../components/bible-data'
+import { ALL_BOOKS, OT_BOOKS, NT_BOOKS, VERSION_GROUPS, CHINESE_VERSION_IDS, VERSION_LANG_MAP, CHAPTER_LABELS, OT_LABELS, NT_LABELS } from '../components/bible-data'
 
 /**
  * 圣经阅读器核心逻辑
@@ -22,17 +22,19 @@ export function useBibleReader() {
   const hasPrev = computed(() => !(selectedBookIndex.value === 0 && selectedChapter.value === 1))
   const hasNext = computed(() => !(selectedBookIndex.value === ALL_BOOKS.length - 1 && selectedChapter.value === chapterCount.value))
 
+  const currentLang = computed(() => VERSION_LANG_MAP[selectedVersion.value] || 'en')
   const isChinese = computed(() => CHINESE_VERSION_IDS.has(selectedVersion.value))
-  const otLabel = computed(() => isChinese.value ? '旧约' : 'Old Testament')
-  const ntLabel = computed(() => isChinese.value ? '新约' : 'New Testament')
+  const otLabel = computed(() => OT_LABELS[currentLang.value] || OT_LABELS.en)
+  const ntLabel = computed(() => NT_LABELS[currentLang.value] || NT_LABELS.en)
 
   function bookDisplayName(book) {
     if (!book) return ''
-    return isChinese.value ? book.name.zh : book.name.en
+    return book.name[currentLang.value] || book.name.en
   }
 
   function chapterLabel(ch) {
-    return isChinese.value ? `第 ${ch} 章` : `Ch. ${ch}`
+    const fn = CHAPTER_LABELS[currentLang.value] || CHAPTER_LABELS.en
+    return fn(ch)
   }
 
   function onBookChange() {

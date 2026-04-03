@@ -24,24 +24,6 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-
-const getParticleStyle = (index) => {
-  const size = Math.random() * 4 + 1
-  const x = Math.random() * 100
-  const y = Math.random() * 100
-  const delay = Math.random() * 20
-  const duration = Math.random() * 10 + 10
-  
-  return {
-    width: `${size}px`,
-    height: `${size}px`,
-    left: `${x}%`,
-    top: `${y}%`,
-    animationDelay: `${delay}s`,
-    animationDuration: `${duration}s`
-  }
-}
 </script>
 
 <style scoped>

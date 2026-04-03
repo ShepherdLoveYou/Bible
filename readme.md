@@ -27,7 +27,8 @@ A VitePress-based gospel blog dedicated to sharing biblical truth, feast knowled
 
 ## Features
 
-- **Online Bible Reader** -- Multi-language (Chinese / English), 10 versions (CUNPS, CUV, ChiSB, KJV, ESV, NIV, NKJV, NLT, NASB, WEB), fullscreen reading mode with search, font scaling, and keyboard shortcuts
+- **Online Bible Reader** -- 19 versions across 15 languages (中文/English/한국어/Español/Français/Deutsch/Português/Русский/العربية/Ελληνικά/Tiếng Việt/Suomi/Română/Esperanto), fully offline with local data, fullscreen reading mode with search, font scaling, and keyboard shortcuts
+- **Multi-language UI** -- Book names, chapter labels, and OT/NT group names automatically switch to the language of the selected Bible version (14 languages, fallback to English)
 - **Apple-style Design System** -- Frosted glass cards, orb background animation, smooth View Transition API theme toggle, floating action button, mobile dock navigation
 - **Automatic Blog Management** -- Drop a `.md` file into `docs/blogs/`, and it appears in the sidebar automatically, sorted by git commit time (newest first)
 - **Giscus Comments** -- GitHub Discussions-based comment system on every article page
@@ -45,7 +46,7 @@ A VitePress-based gospel blog dedicated to sharing biblical truth, feast knowled
 | TypeScript | Configuration and type definitions |
 | [Giscus](https://giscus.app/) | Comment system |
 | [Busuanzi](https://busuanzi.ibruce.info/) | Visitor analytics |
-| [Bolls.life API](https://bolls.life/) | Bible verse data source |
+| [thiagobodruk/bible](https://github.com/thiagobodruk/bible) | Bible text data source (local JSON, 19 versions) |
 
 ---
 
@@ -65,7 +66,12 @@ docs/
     resource-share.md
     sunday-school-genesis.md
     assets/                         # Article images
-  public/                           # Static assets (favicon, SVG icons, etc.)
+  public/
+    bible/                          # Local Bible data (19 versions × 66 books)
+      zh_cuv/1.json … 66.json      # e.g. Chinese Union Version
+      en_kjv/1.json … 66.json      # e.g. King James Version
+      …                             # (19 version directories total)
+    favicon.ico, bible.svg, …      # Static assets
   .vitepress/
     config.ts                       # VitePress config (nav, sidebar, base path)
     utils/
@@ -82,10 +88,9 @@ docs/
       components/
         BibleReader.vue             # Bible reader widget (compact card view)
         BibleFullscreen.vue         # Fullscreen reading mode (Teleport to body)
-        bible-data.ts               # 66 books data + version definitions
+        bible-data.ts               # 66 books × 14 languages + version definitions
         BlogHead.vue                # Article header (author, date)
         VisitorPanel.vue            # Visitor statistics panel
-        backTop.vue                 # Back to top button
         AppleBackground.vue         # Animated orb background
         AppleButton.vue             # Styled button
         AppleCard.vue               # Frosted glass card
@@ -98,6 +103,8 @@ docs/
         AppleSearch.vue             # Search interface
         AppleTabs.vue               # Tab component
         AppleTooltip.vue            # Tooltip
+scripts/
+  download-bible.mjs                # One-time script to download Bible data
 .github/
   workflows/
     deploy.yml                      # GitHub Pages CI/CD pipeline
@@ -121,10 +128,10 @@ Layout.vue
   +-- [all components]         (auto-registered, used in template slots)
 
 BibleReader.vue
-  +-- useBibleReader.js        (version/book/chapter state + API calls)
+  +-- useBibleReader.js        (version/book/chapter state + local JSON fetch)
   +-- BibleFullscreen.vue      (fullscreen sub-component)
         +-- useBibleSearch.js  (search state + text highlighting)
-  +-- bible-data.ts            (static book data + version metadata)
+  +-- bible-data.ts            (multi-language book names + version metadata)
 ```
 
 ### Composables
@@ -133,7 +140,7 @@ Each composable encapsulates a single concern and returns reactive state plus me
 
 | Composable | Responsibility | Input | Key Exports |
 |---|---|---|---|
-| `useBibleReader()` | Bible reading core logic | None | `selectedVersion`, `selectedBookIndex`, `selectedChapter`, `verses`, `loading`, `error`, `isChinese`, `loadChapter()`, `prevChapter()`, `nextChapter()` |
+| `useBibleReader()` | Bible reading core logic | None | `selectedVersion`, `verses`, `loading`, `currentLang`, `bookDisplayName()`, `chapterLabel()`, `loadChapter()`, `prevChapter()`, `nextChapter()` |
 | `useBibleSearch(verses)` | Fullscreen text search | `Ref<Array>` of verses | `searchQuery`, `searchMatches`, `toggleSearch()`, `onSearch()`, `highlightText()`, `isSearchHighlight()` |
 | `useViewTransition()` | Theme toggle with ripple animation | None | `isDark` (also provides `toggle-appearance` via Vue inject) |
 | `useNotification()` | Global notification management | None | `$notify.show()`, `$notify.success()`, `$notify.error()`, etc. |
@@ -171,18 +178,20 @@ User selects version/book/chapter
         v
 useBibleReader.js
   - Updates reactive refs (selectedVersion, selectedBookIndex, selectedChapter)
-  - Calls bolls.life API: GET /get-chapter/{version}/{bookIndex}/{chapter}
-  - Populates verses ref
+  - Determines language from VERSION_LANG_MAP[version]
+  - Fetches local JSON: /bible/{version}/{bookId}.json
+  - Caches entire book (Map key: "version-bookId")
+  - Extracts chapter from cache, populates verses ref
         |
         v
 BibleReader.vue (compact view)
-  - Renders verse list, navigation controls
+  - Renders verse list with language-aware book/chapter names
   - On "fullscreen" click, opens BibleFullscreen
         |
         v
 BibleFullscreen.vue (Teleport to body)
   - Receives state via props, emits updates back
-  - Initializes useBibleSearch(verses) for search overlay
+  - Initializes useBibleSearch(computed verses ref) for search overlay
   - Supports keyboard shortcuts: Esc (close), Left/Right (navigate), Ctrl+F (search)
 ```
 
@@ -333,52 +342,55 @@ See the [VitePress Layout Slots documentation](https://vitepress.dev/guide/exten
 
 ## Bible Reader
 
-The Bible reader is embedded in the homepage hero area (desktop) and above the features section (mobile).
+The Bible reader is embedded in the homepage hero area (desktop) and above the features section (mobile). All data is local -- no external API calls at runtime.
 
-### Supported Versions
+### Supported Versions (19 versions, 15 languages)
 
-**Chinese (3)**:
-- CUNPS -- Xin Biao Dian He He Ben (Simplified)
-- CUV -- He He Ben (Traditional)
-- ChiSB -- Si Gao Sheng Jing
+| Language | Versions |
+|---|---|
+| 中文 Chinese | 和合本 (CUV), 新译本 (NCV) |
+| English | KJV, BBE |
+| 한국어 Korean | 한국어 |
+| Español Spanish | Reina Valera |
+| Français French | Bible de l'Épée |
+| Deutsch German | Schlachter |
+| Português Portuguese | NVI, Almeida Revisada, Almeida Corrigida |
+| Русский Russian | Синодальный |
+| العربية Arabic | Arabic Bible |
+| Ελληνικά Greek | Modern Greek |
+| Tiếng Việt Vietnamese | Tiếng Việt |
+| Suomi Finnish | Finnish Bible, Pyhä Raamattu |
+| Română Romanian | Cornilescu |
+| Esperanto | Esperanto |
 
-**English (7)**:
-- KJV -- King James Version
-- ESV -- English Standard Version
-- NIV -- New International Version
-- NKJV -- New King James Version
-- NLT -- New Living Translation
-- NASB -- New American Standard Bible
-- WEB -- World English Bible
+### Multi-language Book Names
+
+Book names, chapter labels (e.g. "第 1 章", "Ch. 1", "1장", "Capítulo 1"), and OT/NT group labels all display in the language corresponding to the selected Bible version. If a language is unavailable, English is used as fallback.
 
 ### Navigation
 
 - 66 books organized into Old Testament (39) and New Testament (27)
 - Book names display in Chinese or English based on the selected version
 - Chapter navigation via dropdown or previous/next buttons
-- Default: CUNPS, Gospel of John, Chapter 1
+- Default: zh_cuv (和合本), Gospel of John, Chapter 1
 
 ### Fullscreen Mode
 
 - Enter via the expand button on the compact reader
-- Keyboard shortcuts:
-  - `Esc` -- Close fullscreen
-  - `Left Arrow` -- Previous chapter
-  - `Right Arrow` -- Next chapter
-  - `Ctrl+F` / `Cmd+F` -- Toggle search
+- Keyboard shortcuts: `Esc` (close), `←`/`→` (navigate chapters), `Ctrl+F` (search)
 - Font size adjustable from 12px to 32px
 - Page Up / Page Down for scrolling
 - Search highlights matching verses with navigation between results
 
-### API
+### Local Data
 
-Verse data is fetched from the [Bolls.life](https://bolls.life/) public API:
+Bible text data is sourced from [thiagobodruk/bible](https://github.com/thiagobodruk/bible) and stored as per-book JSON files in `docs/public/bible/{version}/{bookId}.json`. Each file contains a 2D array: `chapters[chapterIndex][verseIndex] = verse text`.
 
+To re-download or update the data:
+
+```bash
+node scripts/download-bible.mjs
 ```
-GET https://bolls.life/get-chapter/{version}/{bookIndex}/{chapter}/
-```
-
-Returns an array of verse objects: `{ pk, verse, text }`.
 
 ---
 
@@ -415,39 +427,13 @@ BLOG_BASE=/my-blog/ pnpm build
 
 | Command | Description |
 |---|---|
-| `pnpm dev` | Start development server with hot reload (auto-opens browser) |
+| `pnpm dev` | Start development server with hot reload |
 | `pnpm build` | Build production site to `docs/.vitepress/dist/` |
 | `pnpm preview` | Preview the production build locally |
+| `node scripts/download-bible.mjs` | Re-download Bible data from thiagobodruk/bible |
 
 ---
 
 ## License
 
 MIT
-
-### 组件开发
-- 遵循 Vue 3 组合式 API 模式
-- 使用 TypeScript 进行属性定义
-- 保持苹果设计语言的一致性
-- 实现适当的无障碍功能
-
-### 样式规范
-- 使用 `style.css` 中定义的 CSS 自定义属性
-- 遵循毛玻璃设计模式
-- 确保所有屏幕尺寸的响应式设计
-- 支持明暗两种主题
-
-## 部署到 GitHub Pages（GitHub Actions）
-
-已内置自动部署工作流：`.github/workflows/deploy.yml`。
-
-### 一次性设置
-1. 将仓库推送到 GitHub（默认分支为 `main`）。
-2. 打开仓库 `Settings` -> `Pages`。
-3. 在 `Build and deployment` 中将 `Source` 设为 `GitHub Actions`。
-
-### 后续发布
-- 每次推送到 `main` 分支都会自动构建并部署。
-- 工作流会自动设置 `BLOG_BASE`：
-  - 如果仓库是 `<username>.github.io`，则使用 `/`
-  - 其他仓库使用 `/<repo-name>/`

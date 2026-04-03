@@ -1,142 +1,429 @@
+<p align="right">
+  <strong>English</strong> | <a href="./README.zh-CN.md">中文</a>
+</p>
 
-# ✝️ 福音的光 Gospel Light
+# Gospel Light -- Fu Yin De Guang
 
-一个基于 VitePress 构建的福音主题博客，致力于分享圣经真理、节期知识和信仰资源。
+A VitePress-based gospel blog dedicated to sharing biblical truth, feast knowledge, and faith resources through an Apple-inspired design system.
 
-🔗 **在线访问**: [https://shepherdloveyou.github.io/Bible/](https://shepherdloveyou.github.io/Bible/)
+**Online**: <https://shepherdloveyou.github.io/Bible/>
 
-## ✨ 特性
+---
 
-- 📖 **在线圣经阅读器** — 支持多语言（中文/英文）、多版本（和合本、ESV、KJV 等），内嵌于首页
-- 🎨 **Apple 风格设计系统** — 毛玻璃卡片、动画、暗色模式
-- 📝 **自动博客管理** — 新增 Markdown 文件自动出现在侧边栏（按 Git 提交时间排序）
-- 💬 **Giscus 评论** — 基于 GitHub Discussions 的评论系统
-- 📊 **访客统计** — 基于不蒜子的访问量和访客数统计
-- 🚀 **GitHub Pages 自动部署** — 推送 `main` 分支后自动构建部署
+## Table of Contents
 
-## 🛠️ 技术栈
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Architecture](#architecture)
+- [Getting Started](#getting-started)
+- [Development Guide](#development-guide)
+- [Bible Reader](#bible-reader)
+- [Deployment](#deployment)
+- [Scripts Reference](#scripts-reference)
+- [License](#license)
 
-| 技术 | 用途 |
-|------|------|
-| [VitePress](https://vitepress.dev/) v1.6 | 静态站点生成 |
-| [Vue 3](https://vuejs.org/) | 组件框架 (Composition API) |
-| TypeScript | 配置与类型定义 |
-| [Giscus](https://giscus.app/) | 评论系统 |
-| [Busuanzi](https://busuanzi.ibruce.info/) | 访客统计 |
-| [Bolls.life API](https://bolls.life/) | 圣经经文数据源 |
+---
 
-## 📁 项目结构
+## Features
+
+- **Online Bible Reader** -- Multi-language (Chinese / English), 10 versions (CUNPS, CUV, ChiSB, KJV, ESV, NIV, NKJV, NLT, NASB, WEB), fullscreen reading mode with search, font scaling, and keyboard shortcuts
+- **Apple-style Design System** -- Frosted glass cards, orb background animation, smooth View Transition API theme toggle, floating action button, mobile dock navigation
+- **Automatic Blog Management** -- Drop a `.md` file into `docs/blogs/`, and it appears in the sidebar automatically, sorted by git commit time (newest first)
+- **Giscus Comments** -- GitHub Discussions-based comment system on every article page
+- **Visitor Analytics** -- Busuanzi-based page view and unique visitor counters
+- **GitHub Pages CI/CD** -- Push to `main` triggers automatic build and deployment via GitHub Actions
+
+---
+
+## Tech Stack
+
+| Technology | Purpose |
+|---|---|
+| [VitePress](https://vitepress.dev/) v1.6 | Static site generator |
+| [Vue 3](https://vuejs.org/) | Component framework (Composition API) |
+| TypeScript | Configuration and type definitions |
+| [Giscus](https://giscus.app/) | Comment system |
+| [Busuanzi](https://busuanzi.ibruce.info/) | Visitor analytics |
+| [Bolls.life API](https://bolls.life/) | Bible verse data source |
+
+---
+
+## Project Structure
 
 ```
 docs/
-├── index.md                    # 首页（Hero + 功能卡片 + 圣经阅读器）
-├── about.md                    # 关于页
-├── blogs/                      # 博客文章（Markdown）
-│   ├── bible-reading.md
-│   ├── feasts-of-the-lord.md
-│   ├── good-friday.md
-│   ├── passover.md
-│   ├── passover-seder.md
-│   ├── pentecost.md
-│   ├── resource-share.md
-│   └── sunday-school-genesis.md
-├── public/                     # 静态资源
-└── .vitepress/
-    ├── config.ts               # VitePress 配置（自动扫描博客、导航生成）
-    └── theme/
-        ├── Layout.vue          # 自定义布局（圣经阅读器 + Giscus）
-        ├── index.ts            # 主题入口（自动注册组件）
-        ├── style.css           # 全局样式与 CSS 变量
-        └── components/         # Vue 组件
-            ├── BibleReader.vue         # 圣经阅读器（多版本、多语言）
-            ├── bible-data.ts           # 66 卷书数据（书名、章数）
-            ├── AppleCard.vue           # 毛玻璃卡片
-            ├── AppleButton.vue         # 交互按钮
-            ├── AppleBackground.vue     # 背景效果
-            ├── AppleNavEnhancement.vue # 导航栏增强
-            ├── AppleNotification.vue   # 通知弹窗
-            ├── AppleModal.vue          # 模态对话框
-            ├── AppleSearch.vue         # 搜索界面
-            ├── AppleTabs.vue           # 标签页
-            ├── VisitorPanel.vue        # 访客统计面板
-            └── ...                     # 更多组件
+  index.md                          # Homepage (Hero + feature cards + Bible reader)
+  about.md                          # About page
+  blogs/                            # Blog articles (Markdown)
+    bible-reading.md
+    feasts-of-the-lord.md
+    good-friday.md
+    passover.md
+    passover-seder.md
+    pentecost.md
+    resource-share.md
+    sunday-school-genesis.md
+    assets/                         # Article images
+  public/                           # Static assets (favicon, SVG icons, etc.)
+  .vitepress/
+    config.ts                       # VitePress config (nav, sidebar, base path)
+    utils/
+      blog.ts                       # Blog list generator (scans blogs/, sorts by git time)
+    theme/
+      index.ts                      # Theme entry (auto-registers all components)
+      Layout.vue                    # Custom layout (slots, Giscus, scroll handler)
+      style.css                     # Global styles and CSS custom properties
+      composables/
+        useBibleReader.js           # Bible reader core logic
+        useBibleSearch.js           # Fullscreen search functionality
+        useViewTransition.js        # Theme toggle animation (View Transition API)
+        useNotification.js          # Apple-style notification manager
+      components/
+        BibleReader.vue             # Bible reader widget (compact card view)
+        BibleFullscreen.vue         # Fullscreen reading mode (Teleport to body)
+        bible-data.ts               # 66 books data + version definitions
+        BlogHead.vue                # Article header (author, date)
+        VisitorPanel.vue            # Visitor statistics panel
+        backTop.vue                 # Back to top button
+        AppleBackground.vue         # Animated orb background
+        AppleButton.vue             # Styled button
+        AppleCard.vue               # Frosted glass card
+        AppleFloatingActionButton.vue  # Floating action button
+        AppleLoadingSpinner.vue     # Loading spinner
+        AppleModal.vue              # Modal dialog
+        AppleNavEnhancement.vue     # Mobile dock navigation
+        AppleNotification.vue       # Notification toast
+        AppleProgressBar.vue        # Progress bar
+        AppleSearch.vue             # Search interface
+        AppleTabs.vue               # Tab component
+        AppleTooltip.vue            # Tooltip
+.github/
+  workflows/
+    deploy.yml                      # GitHub Pages CI/CD pipeline
 ```
 
-## 🚀 快速开始
+---
 
-### 环境要求
+## Architecture
+
+The project follows a **low coupling, high cohesion** architecture. Business logic is extracted into composables, UI is split into focused components, and build-time utilities are isolated from runtime code.
+
+### Module Dependency Graph
+
+```
+config.ts
+  +-- utils/blog.ts            (build-time blog list generation)
+
+Layout.vue
+  +-- useViewTransition.js     (theme toggle animation)
+  +-- Giscus                   (comment system, via @giscus/vue)
+  +-- [all components]         (auto-registered, used in template slots)
+
+BibleReader.vue
+  +-- useBibleReader.js        (version/book/chapter state + API calls)
+  +-- BibleFullscreen.vue      (fullscreen sub-component)
+        +-- useBibleSearch.js  (search state + text highlighting)
+  +-- bible-data.ts            (static book data + version metadata)
+```
+
+### Composables
+
+Each composable encapsulates a single concern and returns reactive state plus methods.
+
+| Composable | Responsibility | Input | Key Exports |
+|---|---|---|---|
+| `useBibleReader()` | Bible reading core logic | None | `selectedVersion`, `selectedBookIndex`, `selectedChapter`, `verses`, `loading`, `error`, `isChinese`, `loadChapter()`, `prevChapter()`, `nextChapter()` |
+| `useBibleSearch(verses)` | Fullscreen text search | `Ref<Array>` of verses | `searchQuery`, `searchMatches`, `toggleSearch()`, `onSearch()`, `highlightText()`, `isSearchHighlight()` |
+| `useViewTransition()` | Theme toggle with ripple animation | None | `isDark` (also provides `toggle-appearance` via Vue inject) |
+| `useNotification()` | Global notification management | None | `$notify.show()`, `$notify.success()`, `$notify.error()`, etc. |
+
+### Component Auto-Registration
+
+All `.vue` files under `theme/components/` are automatically registered as global components via `import.meta.glob` in `theme/index.ts`. The filename becomes the component name. No manual `app.component()` calls are needed -- just create a `.vue` file and use it in any template.
+
+```ts
+// theme/index.ts
+const modules = import.meta.glob("./components/*.vue", { eager: true })
+for (const path in modules) {
+  const componentName = path.match(/\/([^/]+)\.vue$/)?.[1]
+  if (componentName) app.component(componentName, modules[path].default)
+}
+```
+
+### Layout Slot Mapping
+
+The custom `Layout.vue` injects components into VitePress default theme slots:
+
+| Slot | Content | Visibility |
+|---|---|---|
+| `#home-hero-image` | `BibleReader` (compact card) | Desktop only |
+| `#home-features-before` | `BibleReader` (compact card) | Mobile only |
+| `#doc-after` | `Giscus` comment widget | Article pages |
+
+Global overlays (`AppleBackground`, `AppleNavEnhancement`, `AppleFloatingActionButton`) render outside the Layout slots.
+
+### Data Flow: Bible Reader
+
+```
+User selects version/book/chapter
+        |
+        v
+useBibleReader.js
+  - Updates reactive refs (selectedVersion, selectedBookIndex, selectedChapter)
+  - Calls bolls.life API: GET /get-chapter/{version}/{bookIndex}/{chapter}
+  - Populates verses ref
+        |
+        v
+BibleReader.vue (compact view)
+  - Renders verse list, navigation controls
+  - On "fullscreen" click, opens BibleFullscreen
+        |
+        v
+BibleFullscreen.vue (Teleport to body)
+  - Receives state via props, emits updates back
+  - Initializes useBibleSearch(verses) for search overlay
+  - Supports keyboard shortcuts: Esc (close), Left/Right (navigate), Ctrl+F (search)
+```
+
+### Build-Time Blog Generation
+
+`utils/blog.ts` runs at build time (Node.js) to scan `docs/blogs/` and produce the sidebar:
+
+1. `readdirSync` lists all `.md` files in `docs/blogs/`
+2. Each file's content is read; the first `# Heading` is extracted as the display title
+3. `git log -1 --format=%at` retrieves the last commit timestamp for each file
+4. Articles are sorted by commit time descending (newest first)
+5. Untracked (new) files get `Date.now()` as their timestamp, so they appear at the top
+
+The result is consumed by `config.ts` which injects it into `themeConfig.sidebar` and `themeConfig.nav`.
+
+---
+
+## Getting Started
+
+### Prerequisites
 
 - [Node.js](https://nodejs.org/) >= 18
-- [pnpm](https://pnpm.io/) >= 8
+- [pnpm](https://pnpm.io/) >= 8 (or npm as fallback)
 
-### 本地开发
+### Install and Run
 
 ```bash
-# 克隆仓库
+# Clone the repository
 git clone https://github.com/ShepherdLoveYou/Bible.git
 cd Bible
 
-# 安装依赖
+# Install dependencies
 pnpm install
 
-# 启动开发服务器（自动打开浏览器）
+# Start the development server (opens browser automatically)
 pnpm dev
 
-# 构建生产版本
+# Build for production
 pnpm build
 
-# 本地预览构建产物
+# Preview the production build locally
 pnpm preview
 ```
 
-### 添加新文章
+If pnpm is unavailable, substitute with `npm install` / `npm run dev` / `npm run build`.
 
-在 `docs/blogs/` 目录下创建 `.md` 文件即可，侧边栏会自动生成。文件以 `# 标题` 开头：
+---
+
+## Development Guide
+
+### Adding a New Blog Post
+
+1. Create a `.md` file in `docs/blogs/`:
 
 ```markdown
-# 文章标题
+# Your Article Title
 
-正文内容...
+Article content goes here. Standard Markdown syntax is supported.
+
+## Section Heading
+
+More content...
 ```
 
-文章按 Git 最后提交时间自动排序，最新的排在最前。
+2. That is it. No configuration changes are needed. The build system will:
+   - Detect the new file automatically
+   - Extract the `# Title` as the sidebar display name
+   - Sort it to the top of the sidebar (newest git commit first)
+   - Link the homepage hero button to the latest article
 
-## 🌐 部署到 GitHub Pages
+3. Commit and push to `main` to trigger deployment.
 
-本项目已配置 GitHub Actions 自动部署（`.github/workflows/deploy.yml`）：
+### Adding a New Component
 
-1. Fork 或克隆此仓库到你的 GitHub 账号
-2. 在仓库 **Settings → Pages** 中将 Source 设置为 **GitHub Actions**
-3. 推送代码到 `main` 分支，会自动触发构建和部署
-4. 访问 `https://<你的用户名>.github.io/<仓库名>/`
+1. Create a `.vue` file in `docs/.vitepress/theme/components/`:
 
-> `base` 路径会根据仓库名自动计算，无需手动配置。如果仓库名为 `<用户名>.github.io`，则 base 为 `/`。
+```vue
+<template>
+  <div class="my-widget">...</div>
+</template>
 
-## 📖 圣经阅读器
+<script setup>
+// Component logic
+</script>
 
-内嵌在首页 Hero 区域右侧，支持：
+<style scoped>
+.my-widget { /* styles */ }
+</style>
+```
 
-- **中文版本**: 新标点和合本(简体)、和合本(繁體)、思高圣经
-- **英文版本**: KJV、ESV、NIV、NKJV、NLT、NASB、WEB
-- 66 卷书完整导航（旧约 39 卷 + 新约 27 卷）
-- 章节切换、上一章/下一章快捷按钮
-- 经文数据来自 [Bolls.life](https://bolls.life/) 开放 API
+2. Use it in any Markdown file or Vue template by its filename:
 
-## 📄 License
+```markdown
+<!-- In any .md file -->
+<MyWidget />
+```
+
+No import or registration is needed -- the auto-registration in `theme/index.ts` handles it.
+
+### Adding a New Composable
+
+1. Create a `.js` or `.ts` file in `docs/.vitepress/theme/composables/`:
+
+```js
+import { ref, computed } from 'vue'
+
+export function useMyFeature() {
+  const state = ref(null)
+  // ... logic
+  return { state }
+}
+```
+
+2. Import and use in any component:
+
+```vue
+<script setup>
+import { useMyFeature } from '../composables/useMyFeature'
+const { state } = useMyFeature()
+</script>
+```
+
+### Modifying the Layout
+
+`Layout.vue` uses VitePress default theme slots. Available slots include:
+
+- `#home-hero-image` -- Right side of the homepage hero section
+- `#home-features-before` -- Before the features grid
+- `#doc-before` / `#doc-after` -- Before/after article content
+- `#nav-bar-content-after` -- After the navigation bar
+
+See the [VitePress Layout Slots documentation](https://vitepress.dev/guide/extending-default-theme#layout-slots) for the full list.
+
+### Styling Conventions
+
+- Global CSS custom properties are defined in `theme/style.css`
+- Use `scoped` styles in components to avoid leaking
+- Dark mode is handled by VitePress built-in `.dark` class on `<html>`
+- The Apple design system components (`Apple*.vue`) share consistent frosted glass and animation patterns
+
+### Environment Variables
+
+| Variable | Purpose | Default |
+|---|---|---|
+| `BLOG_BASE` | Override the VitePress `base` path for deployment | `/` (auto-detected in CI) |
+
+---
+
+## Bible Reader
+
+The Bible reader is embedded in the homepage hero area (desktop) and above the features section (mobile).
+
+### Supported Versions
+
+**Chinese (3)**:
+- CUNPS -- Xin Biao Dian He He Ben (Simplified)
+- CUV -- He He Ben (Traditional)
+- ChiSB -- Si Gao Sheng Jing
+
+**English (7)**:
+- KJV -- King James Version
+- ESV -- English Standard Version
+- NIV -- New International Version
+- NKJV -- New King James Version
+- NLT -- New Living Translation
+- NASB -- New American Standard Bible
+- WEB -- World English Bible
+
+### Navigation
+
+- 66 books organized into Old Testament (39) and New Testament (27)
+- Book names display in Chinese or English based on the selected version
+- Chapter navigation via dropdown or previous/next buttons
+- Default: CUNPS, Gospel of John, Chapter 1
+
+### Fullscreen Mode
+
+- Enter via the expand button on the compact reader
+- Keyboard shortcuts:
+  - `Esc` -- Close fullscreen
+  - `Left Arrow` -- Previous chapter
+  - `Right Arrow` -- Next chapter
+  - `Ctrl+F` / `Cmd+F` -- Toggle search
+- Font size adjustable from 12px to 32px
+- Page Up / Page Down for scrolling
+- Search highlights matching verses with navigation between results
+
+### API
+
+Verse data is fetched from the [Bolls.life](https://bolls.life/) public API:
+
+```
+GET https://bolls.life/get-chapter/{version}/{bookIndex}/{chapter}/
+```
+
+Returns an array of verse objects: `{ pk, verse, text }`.
+
+---
+
+## Deployment
+
+### GitHub Pages (Automatic)
+
+The repository includes `.github/workflows/deploy.yml` that runs on every push to `main`:
+
+1. Checks out the repository (with full git history for blog sorting)
+2. Sets up pnpm v8.14.0 and Node.js 20
+3. Auto-detects the `base` path:
+   - `<username>.github.io` repos use `/`
+   - Other repos use `/<repo-name>/`
+4. Runs `pnpm install` and `pnpm run build`
+5. Uploads `docs/.vitepress/dist` as a GitHub Pages artifact
+6. Deploys to GitHub Pages
+
+**Setup**: Go to repository Settings -> Pages -> Source -> select "GitHub Actions".
+
+### Manual Deployment
+
+```bash
+# Build with a custom base path
+BLOG_BASE=/my-blog/ pnpm build
+
+# The output is in docs/.vitepress/dist/
+# Upload to any static hosting service
+```
+
+---
+
+## Scripts Reference
+
+| Command | Description |
+|---|---|
+| `pnpm dev` | Start development server with hot reload (auto-opens browser) |
+| `pnpm build` | Build production site to `docs/.vitepress/dist/` |
+| `pnpm preview` | Preview the production build locally |
+
+---
+
+## License
 
 MIT
-
-### 内容结构
-- 博客文章位于 `/docs/blogs/`，使用 `.md` 扩展名
-- 图片资源存储在 `/docs/blogs/assets/` 中
-- 导航配置在 `.vitepress/config.ts` 的侧边栏部分
-
-## 开发指南
-
-### 添加新博客文章
-1. 在 `/docs/blogs/` 中创建新的 `.md` 文件
-2. 添加包含标题、日期和描述的 frontmatter
-3. 更新 `.vitepress/config.ts` 中的侧边栏导航
 
 ### 组件开发
 - 遵循 Vue 3 组合式 API 模式

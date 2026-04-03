@@ -1,13 +1,15 @@
 <script lang="ts" setup>
 import Giscus from "@giscus/vue";
 import DefaultTheme from "vitepress/theme";
-import { watch, nextTick, provide, onMounted, onUnmounted } from "vue";
+import { watch, onMounted, onUnmounted } from "vue";
 import { inBrowser, useData } from "vitepress";
+import { useViewTransition } from "./composables/useViewTransition";
 
-const { isDark, page } = useData();
-
+const { isDark } = useViewTransition();
+const { page } = useData();
 const { Layout } = DefaultTheme;
 
+// Smooth scroll to BibleReader when clicking #bible-reader links
 function scrollToBibleReader(e: Event) {
   const link = (e.target as HTMLElement).closest('a[href*="#bible-reader"]')
   if (!link) return
@@ -30,51 +32,17 @@ onUnmounted(() => {
   }
 })
 
+// Sync Giscus theme with dark mode
 watch(isDark, (dark) => {
   if (!inBrowser) return;
-
   const iframe = document
     .querySelector("giscus-widget")
     ?.shadowRoot?.querySelector("iframe");
-
   iframe?.contentWindow?.postMessage(
     { giscus: { setConfig: { theme: dark ? "dark" : "light" } } },
     "https://giscus.app"
   );
 });
-
-const enableTransitions = () =>
-  'startViewTransition' in document &&
-  window.matchMedia('(prefers-reduced-motion: no-preference)').matches
-
-provide('toggle-appearance', async ({ clientX: x, clientY: y }: MouseEvent) => {
-  if (!enableTransitions()) {
-    isDark.value = !isDark.value
-    return
-  }
-
-  const clipPath = [
-    `circle(0px at ${x}px ${y}px)`,
-    `circle(${Math.hypot(
-      Math.max(x, innerWidth - x),
-      Math.max(y, innerHeight - y)
-    )}px at ${x}px ${y}px)`
-  ]
-
-  await document.startViewTransition(async () => {
-    isDark.value = !isDark.value
-    await nextTick()
-  }).ready
-
-  document.documentElement.animate(
-    { clipPath: isDark.value ? clipPath.reverse() : clipPath },
-    {
-      duration: 300,
-      easing: 'ease-in',
-      pseudoElement: `::view-transition-${isDark.value ? 'old' : 'new'}(root)`
-    }
-  )
-})
 </script>
 
 <template>
@@ -84,6 +52,11 @@ provide('toggle-appearance', async ({ clientX: x, clientY: y }: MouseEvent) => {
   <Layout>
     <template #home-hero-image>
       <div class="hero-bible-reader">
+        <BibleReader />
+      </div>
+    </template>
+    <template #home-features-before>
+      <div class="mobile-hero-bible-reader">
         <BibleReader />
       </div>
     </template>
@@ -148,6 +121,17 @@ provide('toggle-appearance', async ({ clientX: x, clientY: y }: MouseEvent) => {
 @media (max-width: 960px) {
   .hero-bible-reader {
     display: none;
+  }
+}
+
+.mobile-hero-bible-reader {
+  display: none;
+  margin-top: 24px;
+}
+
+@media (max-width: 960px) {
+  .mobile-hero-bible-reader {
+    display: block;
   }
 }
 </style>

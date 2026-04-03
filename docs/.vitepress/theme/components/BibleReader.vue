@@ -6,13 +6,16 @@
       <div class="bible-reader-header">
         <span class="bible-reader-icon">📖</span>
         <h3 class="bible-reader-title">圣经阅读 Bible Reader</h3>
+        <button class="fullscreen-btn" @click="openFullscreen" title="全屏阅读 Fullscreen">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+        </button>
       </div>
 
       <!-- Version Selector -->
       <div class="bible-nav">
         <div class="bible-nav-field">
           <label class="bible-label">语言与版本 Language & Version</label>
-          <select v-model="selectedVersion" class="bible-select version-select" @change="loadChapter">
+          <select v-model="selectedVersion" class="bible-select version-select" @change="() => loadChapter(textContainer)">
             <optgroup label="中文 Chinese">
               <option v-for="v in chineseVersions" :key="v.id" :value="v.id">{{ v.name }}</option>
             </optgroup>
@@ -27,27 +30,27 @@
           <label class="bible-label">书卷与章节 Book & Chapter</label>
           <div class="bible-nav-row">
             <select v-model="selectedBookIndex" class="bible-select book-select" @change="onBookChange">
-              <optgroup label="旧约 Old Testament">
+              <optgroup :label="otLabel">
                 <option v-for="(book, i) in otBooks" :key="book.osis" :value="i">
-                  {{ book.name.zh }} {{ book.name.en }}
+                  {{ bookDisplayName(book) }}
                 </option>
               </optgroup>
-              <optgroup label="新约 New Testament">
+              <optgroup :label="ntLabel">
                 <option v-for="(book, i) in ntBooks" :key="book.osis" :value="i + otBooks.length">
-                  {{ book.name.zh }} {{ book.name.en }}
+                  {{ bookDisplayName(book) }}
                 </option>
               </optgroup>
             </select>
-            <select v-model="selectedChapter" class="bible-select chapter-select" @change="loadChapter">
+            <select v-model="selectedChapter" class="bible-select chapter-select" @change="() => loadChapter(textContainer)">
               <option v-for="ch in chapterCount" :key="ch" :value="ch">
-                第 {{ ch }} 章 Ch.{{ ch }}
+                {{ chapterLabel(ch) }}
               </option>
             </select>
           </div>
         </div>
         <div class="bible-nav-actions">
           <button class="nav-btn" :disabled="!hasPrev" @click="prevChapter" title="上一章 Previous">‹</button>
-          <span class="chapter-label">{{ currentBook?.name.zh }} {{ currentBook?.name.en }} {{ selectedChapter }}</span>
+          <span class="chapter-label">{{ bookDisplayName(currentBook) }} {{ selectedChapter }}</span>
           <button class="nav-btn" :disabled="!hasNext" @click="nextChapter" title="下一章 Next">›</button>
         </div>
       </div>
@@ -60,7 +63,7 @@
         </div>
         <div v-else-if="error" class="bible-error">
           <p>{{ error }}</p>
-          <button class="retry-btn" @click="loadChapter">重试 Retry</button>
+          <button class="retry-btn" @click="() => loadChapter(textContainer)">重试 Retry</button>
         </div>
         <div v-else class="bible-text">
           <div v-for="verse in verses" :key="verse.verse" class="bible-verse">
@@ -71,112 +74,69 @@
       </div>
     </div>
   </div>
+
+  <!-- Fullscreen mode (separate component) -->
+  <BibleFullscreen
+    :visible="isFullscreen"
+    :selected-version="selectedVersion"
+    :selected-book-index="selectedBookIndex"
+    :selected-chapter="selectedChapter"
+    :verses="verses"
+    :loading="loading"
+    :error="error"
+    :current-book="currentBook"
+    :chapter-count="chapterCount"
+    :has-prev="hasPrev"
+    :has-next="hasNext"
+    :is-chinese="isChinese"
+    :ot-label="otLabel"
+    :nt-label="ntLabel"
+    :ot-books="otBooks"
+    :nt-books="ntBooks"
+    :chinese-versions="chineseVersions"
+    :english-versions="englishVersions"
+    :book-display-name="bookDisplayName"
+    :chapter-label="chapterLabel"
+    :on-book-change="onBookChange"
+    :prev-chapter="prevChapter"
+    :next-chapter="nextChapter"
+    :load-chapter="() => loadChapter(textContainer)"
+    @close="closeFullscreen"
+    @update:selected-version="v => { selectedVersion = v; loadChapter(textContainer) }"
+    @update:selected-book-index="v => { selectedBookIndex = v }"
+    @update:selected-chapter="v => { selectedChapter = v; loadChapter(textContainer) }"
+  />
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
-import { OT_BOOKS, NT_BOOKS, ALL_BOOKS } from './bible-data'
+import { ref, onMounted } from 'vue'
+import { useBibleReader } from '../composables/useBibleReader'
 
-const otBooks = OT_BOOKS
-const ntBooks = NT_BOOKS
+const {
+  otBooks, ntBooks, chineseVersions, englishVersions,
+  selectedVersion, selectedBookIndex, selectedChapter,
+  verses, loading, error,
+  currentBook, chapterCount, hasPrev, hasNext,
+  isChinese, otLabel, ntLabel,
+  bookDisplayName, chapterLabel,
+  onBookChange, prevChapter, nextChapter, loadChapter,
+} = useBibleReader()
 
-const chineseVersions = [
-  { id: 'CUNPS', name: '新标点和合本(简体)' },
-  { id: 'CUV', name: '和合本(繁體)' },
-  { id: 'ChiSB', name: '思高圣经' },
-]
-
-const englishVersions = [
-  { id: 'KJV', name: 'KJV' },
-  { id: 'ESV', name: 'ESV' },
-  { id: 'NIV', name: 'NIV (1984)' },
-  { id: 'NKJV', name: 'NKJV' },
-  { id: 'NLT', name: 'NLT' },
-  { id: 'NASB', name: 'NASB' },
-  { id: 'WEB', name: 'WEB' },
-]
-
-const selectedVersion = ref('CUNPS')
-const selectedBookIndex = ref(42) // John
-const selectedChapter = ref(1)
-const verses = ref([])
-const loading = ref(false)
-const error = ref('')
 const textContainer = ref(null)
+const isFullscreen = ref(false)
 
-const currentBook = computed(() => ALL_BOOKS[selectedBookIndex.value])
-const chapterCount = computed(() => currentBook.value?.chapters || 1)
-const hasPrev = computed(() => !(selectedBookIndex.value === 0 && selectedChapter.value === 1))
-const hasNext = computed(() => !(selectedBookIndex.value === ALL_BOOKS.length - 1 && selectedChapter.value === chapterCount.value))
-
-function stripHtml(html) {
-  // Remove Strong's numbers <S>...</S> and footnotes <sup>...</sup> with their content
-  const cleaned = html.replace(/<S>\d+<\/S>/gi, '').replace(/<sup>[^<]*<\/sup>/gi, '')
-  const tmp = document.createElement('div')
-  tmp.innerHTML = cleaned
-  return (tmp.textContent || tmp.innerText || '').replace(/\s+/g, ' ')
+function openFullscreen() {
+  isFullscreen.value = true
+  document.body.style.overflow = 'hidden'
 }
 
-function onBookChange() {
-  selectedChapter.value = 1
-  loadChapter()
-}
-
-function prevChapter() {
-  if (selectedChapter.value > 1) {
-    selectedChapter.value--
-  } else if (selectedBookIndex.value > 0) {
-    selectedBookIndex.value--
-    selectedChapter.value = ALL_BOOKS[selectedBookIndex.value].chapters
-  }
-  loadChapter()
-}
-
-function nextChapter() {
-  if (selectedChapter.value < chapterCount.value) {
-    selectedChapter.value++
-  } else if (selectedBookIndex.value < ALL_BOOKS.length - 1) {
-    selectedBookIndex.value++
-    selectedChapter.value = 1
-  }
-  loadChapter()
-}
-
-async function loadChapter() {
-  const book = currentBook.value
-  if (!book) return
-
-  // bolls.life uses 1-based book IDs: Gen=1 ... Rev=66
-  const bookId = selectedBookIndex.value + 1
-  loading.value = true
-  error.value = ''
-  verses.value = []
-
-  try {
-    const resp = await fetch(`https://bolls.life/get-text/${selectedVersion.value}/${bookId}/${selectedChapter.value}/`)
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`)
-    const data = await resp.json()
-    if (Array.isArray(data) && data.length > 0) {
-      verses.value = data.map(v => ({
-        verse: v.verse,
-        text: stripHtml(v.text).trim()
-      }))
-    } else {
-      throw new Error('无法获取经文内容')
-    }
-  } catch (e) {
-    error.value = '加载失败，请稍后重试 Failed to load, please try again'
-  } finally {
-    loading.value = false
-    await nextTick()
-    if (textContainer.value) {
-      textContainer.value.scrollTop = 0
-    }
-  }
+function closeFullscreen() {
+  isFullscreen.value = false
+  document.body.style.overflow = ''
 }
 
 onMounted(() => {
-  loadChapter()
+  loadChapter(textContainer)
 })
 </script>
 
@@ -242,6 +202,28 @@ onMounted(() => {
   color: var(--vp-c-text-1);
   margin: 0;
   letter-spacing: -0.025em;
+  flex: 1;
+}
+
+.fullscreen-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--vp-glass-border);
+  border-radius: var(--vp-radius-small);
+  background: var(--vp-c-surface-1);
+  color: var(--vp-c-text-2);
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.fullscreen-btn:hover {
+  background: var(--vp-c-brand-1);
+  color: white;
+  border-color: var(--vp-c-brand-1);
 }
 
 /* Navigation */
@@ -350,7 +332,7 @@ onMounted(() => {
 
 /* Content Area */
 .bible-text-container {
-  max-height: 420px;
+  max-height: 520px;
   overflow-y: auto;
   border-radius: var(--vp-radius-small);
   background: var(--vp-c-surface-1);
@@ -480,7 +462,7 @@ onMounted(() => {
   }
 
   .bible-text-container {
-    max-height: 320px;
+    max-height: 400px;
     padding: 12px;
   }
 

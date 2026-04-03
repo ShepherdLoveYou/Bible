@@ -85,3 +85,27 @@ const NT: BibleBook[] = [
 export const OT_BOOKS = OT
 export const NT_BOOKS = NT
 export const ALL_BOOKS = [...OT, ...NT]
+
+/** 圣经版本定义 */
+export interface BibleVersion {
+  id: string
+  name: string
+}
+
+export const CHINESE_VERSIONS: BibleVersion[] = [
+  { id: 'CUNPS', name: '新标点和合本(简体)' },
+  { id: 'CUV', name: '和合本(繁體)' },
+  { id: 'ChiSB', name: '思高圣经' },
+]
+
+export const ENGLISH_VERSIONS: BibleVersion[] = [
+  { id: 'KJV', name: 'KJV' },
+  { id: 'ESV', name: 'ESV' },
+  { id: 'NIV', name: 'NIV (1984)' },
+  { id: 'NKJV', name: 'NKJV' },
+  { id: 'NLT', name: 'NLT' },
+  { id: 'NASB', name: 'NASB' },
+  { id: 'WEB', name: 'WEB' },
+]
+
+export const CHINESE_VERSION_IDS = new Set(CHINESE_VERSIONS.map(v => v.id))

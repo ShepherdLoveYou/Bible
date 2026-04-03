@@ -60,6 +60,11 @@ provide('toggle-appearance', async ({ clientX: x, clientY: y }: MouseEvent) => {
   <AppleNavEnhancement />
   <AppleFloatingActionButton />   
   <Layout>
+    <template #home-hero-image>
+      <div class="hero-bible-reader">
+        <BibleReader />
+      </div>
+    </template>
     <template #doc-footer-before> </template>
     <template #doc-after>
       <div style="margin-top: 24px">
@@ -111,4 +116,17 @@ provide('toggle-appearance', async ({ clientX: x, clientY: y }: MouseEvent) => {
 /* .VPSwitchAppearance .check {
   transform: none !important;
 } */
+
+.hero-bible-reader {
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+@media (max-width: 960px) {
+  .hero-bible-reader {
+    max-width: 100%;
+    margin-top: 24px;
+  }
+}
 </style>

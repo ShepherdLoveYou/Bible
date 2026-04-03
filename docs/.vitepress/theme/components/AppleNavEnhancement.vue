@@ -6,7 +6,7 @@
         <a href="/" class="dock-item" title="首页">
           <div class="dock-icon">🏠</div>
         </a>
-        <a href="/blogs/latest" class="dock-item" title="博客">
+        <a href="/#bible-reader" class="dock-item" title="圣经阅读 Bible Reader">
           <div class="dock-icon">📚</div>
         </a>
         <button @click="toggleTheme" class="dock-item" :title="isDark ? '浅色模式' : '深色模式'">

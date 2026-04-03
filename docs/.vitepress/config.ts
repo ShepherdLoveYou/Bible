@@ -56,12 +56,12 @@ export default defineConfig({
   description: "將希望和真理帶到每一個角落 - Bringing hope and truth to every corner",
   ignoreDeadLinks: true,
   // header标签里面插入的内容
-  head: [["link", { rel: "icon", href: "/cross.svg" }]],
+  head: [["link", { rel: "icon", href: "/bible.svg" }]],
   //启用深色模式
   appearance: "dark",
   themeConfig: {
     // 网站的logo
-    logo: "/cross.svg",
+    logo: "/bible.svg",
     // 文章右侧大纲目录
     outline: {
       level: [2, 6],

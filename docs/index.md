@@ -7,8 +7,8 @@ hero:
   tagline: 將希望和真理帶到每一個角落  Bringing hope and truth to every corner
   actions:
     - theme: brand
-      text: 阅读最新文章
-      link: /blogs/latest
+      text: 📖 圣经阅读 Bible Reader
+      link: /#bible-reader
     - theme: alt
       text: 关于本站
       link: /about

@@ -2,7 +2,7 @@
 # 受难日为何称为“Good Friday”（良善星期五）？
 
 #### Author: [Justin Holcomb](https://www.christianity.com/author/justin-holcomb/)
-#### Mandarin Translation & Format:  Redemption Church North Calgary Jing Jiang
+#### Mandarin Translation & Format:  Redemption Church North Calgary Mac
 
 Why do we call Good Friday “good,” when it is such a dark and bleak event commemorating a day of suffering and death for Jesus?  
 为什么我们称受难日为“良善星期五”，而这一天却是纪念耶稣受苦和死亡的黑暗日子？

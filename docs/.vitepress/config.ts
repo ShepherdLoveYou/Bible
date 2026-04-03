@@ -110,7 +110,7 @@ export default defineConfig({
       },
     ],
     // 社交链接
-    socialLinks: [{ icon: "github", link: "https://github.com/ShepherdLoveYou" }],
+    socialLinks: [],
     // 404找不到页面
     notFound: {
       title: "抱歉，您访问的资源不存在",

@@ -20,12 +20,18 @@ features:
   - title: 圣经阅读
     icon: 📖
     details: 圣经阅读资源与下载，帮助你更深入地认识神的话语。
+    link: /blogs/bible-reading
+    linkText: 查看详情
   - title: 节期学习
     icon: 🕎
     details: 耶和华的节期、逾越节、五旬节等圣经节期的深入探讨。
+    link: /blogs/feasts-of-the-lord
+    linkText: 查看详情
   - title: 信仰资源
     icon: ✝️
     details: 电子书、主日学材料等丰富的属灵资源分享。
+    link: /blogs/resource-share
+    linkText: 查看详情
 ---
 
 <div style="margin-top: 24px;">

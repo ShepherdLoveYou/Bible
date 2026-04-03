@@ -8,24 +8,36 @@
         <h3 class="bible-reader-title">圣经阅读</h3>
       </div>
 
-      <!-- Navigation -->
+      <!-- Version Selector -->
       <div class="bible-nav">
+        <div class="bible-nav-row">
+          <select v-model="selectedVersion" class="bible-select version-select" @change="loadChapter">
+            <optgroup label="中文">
+              <option v-for="v in chineseVersions" :key="v.id" :value="v.id">{{ v.name }}</option>
+            </optgroup>
+            <optgroup label="English">
+              <option v-for="v in englishVersions" :key="v.id" :value="v.id">{{ v.name }}</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <!-- Book & Chapter -->
         <div class="bible-nav-row">
           <select v-model="selectedBookIndex" class="bible-select book-select" @change="onBookChange">
             <optgroup label="旧约 Old Testament">
               <option v-for="(book, i) in otBooks" :key="book.osis" :value="i">
-                {{ book.name.zh }}
+                {{ isChinese ? book.name.zh : book.name.en }}
               </option>
             </optgroup>
             <optgroup label="新约 New Testament">
               <option v-for="(book, i) in ntBooks" :key="book.osis" :value="i + otBooks.length">
-                {{ book.name.zh }}
+                {{ isChinese ? book.name.zh : book.name.en }}
               </option>
             </optgroup>
           </select>
           <select v-model="selectedChapter" class="bible-select chapter-select" @change="loadChapter">
             <option v-for="ch in chapterCount" :key="ch" :value="ch">
-              第 {{ ch }} 章
+              {{ isChinese ? `第 ${ch} 章` : `Ch. ${ch}` }}
             </option>
           </select>
         </div>
@@ -58,27 +70,47 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch, nextTick } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { OT_BOOKS, NT_BOOKS, ALL_BOOKS } from './bible-data'
 
 const otBooks = OT_BOOKS
 const ntBooks = NT_BOOKS
 
-const selectedBookIndex = ref(42) // Matthew (index 39+3=42 in combined ... actually index 40 for Matt)
+const chineseVersions = [
+  { id: 'CUNPS', name: '新标点和合本(简体)' },
+  { id: 'CUV', name: '和合本(繁體)' },
+  { id: 'ChiSB', name: '思高圣经' },
+]
+
+const englishVersions = [
+  { id: 'KJV', name: 'KJV' },
+  { id: 'ESV', name: 'ESV' },
+  { id: 'NIV', name: 'NIV (1984)' },
+  { id: 'NKJV', name: 'NKJV' },
+  { id: 'NLT', name: 'NLT' },
+  { id: 'NASB', name: 'NASB' },
+  { id: 'WEB', name: 'WEB' },
+]
+
+const selectedVersion = ref('CUNPS')
+const selectedBookIndex = ref(42) // John
 const selectedChapter = ref(1)
 const verses = ref([])
 const loading = ref(false)
 const error = ref('')
 const textContainer = ref(null)
 
-// Initialize to John (Gospel of John = index 42 in ALL_BOOKS: 39 OT + 3 NT = index 42)
-// Actually: OT has 39 books (index 0-38), NT starts at 39. Matt=39, Mark=40, Luke=41, John=42
-selectedBookIndex.value = 42
-
+const isChinese = computed(() => chineseVersions.some(v => v.id === selectedVersion.value))
 const currentBook = computed(() => ALL_BOOKS[selectedBookIndex.value])
 const chapterCount = computed(() => currentBook.value?.chapters || 1)
 const hasPrev = computed(() => !(selectedBookIndex.value === 0 && selectedChapter.value === 1))
 const hasNext = computed(() => !(selectedBookIndex.value === ALL_BOOKS.length - 1 && selectedChapter.value === chapterCount.value))
+
+function stripHtml(html) {
+  const tmp = document.createElement('div')
+  tmp.innerHTML = html
+  return tmp.textContent || tmp.innerText || ''
+}
 
 function onBookChange() {
   selectedChapter.value = 1
@@ -109,21 +141,21 @@ async function loadChapter() {
   const book = currentBook.value
   if (!book) return
 
+  // bolls.life uses 1-based book IDs: Gen=1 ... Rev=66
+  const bookId = selectedBookIndex.value + 1
   loading.value = true
   error.value = ''
   verses.value = []
 
   try {
-    const resp = await fetch(`https://bible-api.com/${encodeURIComponent(book.name.en)}+${selectedChapter.value}`)
+    const resp = await fetch(`https://bolls.life/get-text/${selectedVersion.value}/${bookId}/${selectedChapter.value}/`)
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`)
     const data = await resp.json()
-    if (data.verses && data.verses.length > 0) {
-      verses.value = data.verses.map(v => ({
+    if (Array.isArray(data) && data.length > 0) {
+      verses.value = data.map(v => ({
         verse: v.verse,
-        text: v.text.trim()
+        text: stripHtml(v.text).trim()
       }))
-    } else if (data.text) {
-      verses.value = [{ verse: 1, text: data.text.trim() }]
     } else {
       throw new Error('无法获取经文内容')
     }
@@ -245,6 +277,10 @@ onMounted(() => {
 
 .book-select {
   flex: 2;
+}
+
+.version-select {
+  width: 100%;
 }
 
 .chapter-select {

@@ -1,9 +1,5 @@
-<html>
-<body>
-<!--StartFragment--><html><head></head><body>
-<hr>
-<h1>逾越节（除酵节，初熟的果子）</h1>
-<h1>Passover (Feast of Unleavened Bread, Firstfruits)</h1>
+# 逾越节（除酵节，初熟的果子）
+# Passover (Feast of Unleavened Bread, Firstfruits)
 <p>2025年4月12日宰杀逾越节羔羊，4月13-19日除酵节<br>
 The Passover lamb will be slaughtered on April 12, 2025, and the Feast of Unleavened Bread will be from April 13 to 19.</p>
 <p>圣经历正月（也称为亚笔月和尼散月）14日是逾越节，15-21日是除酵节。<br>
@@ -221,10 +217,6 @@ Paul calls Jesus’ resurrection the "firstfruits," meaning Jesus was the first 
 <p>总而言之，神藉着逾越节的节期让我们看见耶稣基督按照神的时间受死，埋葬，复活，以至于我们知道他就是神所预备的羔羊，是基督。<br>
 In summary, through the Passover festival, God shows us that Jesus Christ died, was buried, and rose again according to God’s timing, so that we may know He is the Lamb provided by God, the Christ.</p>
 <hr>
-</body></html><!--EndFragment-->
-</body>
-</html>
-
 ![Image](https://github.com/user-attachments/assets/d11ca8a5-8c0b-42cf-8041-4aeaf72e4e5e)
 
 ![Image](https://github.com/user-attachments/assets/2bbee97d-68a9-4ed6-950b-16066913d870)

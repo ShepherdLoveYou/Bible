@@ -1,5 +1,3 @@
-
-
 # What’s So Good about Good Friday?  
 # 受难日为何称为“Good Friday”（良善星期五）？
 

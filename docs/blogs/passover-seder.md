@@ -1,5 +1,3 @@
-
-
 # 逾越节晚餐（主内信徒）  
 # Passover Seder (For Believers in Christ)
 

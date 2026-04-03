@@ -1,53 +1,130 @@
 
+# ✝️ 福音的光 Gospel Light
 
-一名程序员的博客，记录我的碎碎念~
-## 项目概述
+一个基于 VitePress 构建的福音主题博客，致力于分享圣经真理、节期知识和信仰资源。
 
-这是一个使用 VitePress 构建的个人博客，具有自定义的苹果风格设计系统和毛玻璃效果。网站包含博客文章、自定义 Vue 组件，以及支持暗色模式的响应式 UI。
+🔗 **在线访问**: [https://shepherdloveyou.github.io/Bible/](https://shepherdloveyou.github.io/Bible/)
 
-## 开发命令
+## ✨ 特性
 
-- **开发服务器**: `pnpm dev` - 启动 VitePress 开发服务器并自动打开浏览器
-- **构建**: `pnpm build` - 构建生产环境的静态站点
-- **预览**: `pnpm preview` - 本地预览生产构建版本
-- **包管理器**: 使用 `pnpm` (版本 8.14.0)
+- 📖 **在线圣经阅读器** — 支持多语言（中文/英文）、多版本（和合本、ESV、KJV 等），内嵌于首页
+- 🎨 **Apple 风格设计系统** — 毛玻璃卡片、动画、暗色模式
+- 📝 **自动博客管理** — 新增 Markdown 文件自动出现在侧边栏（按 Git 提交时间排序）
+- 💬 **Giscus 评论** — 基于 GitHub Discussions 的评论系统
+- 📊 **访客统计** — 基于不蒜子的访问量和访客数统计
+- 🚀 **GitHub Pages 自动部署** — 推送 `main` 分支后自动构建部署
 
-## 架构
+## 🛠️ 技术栈
 
-### 文件结构
-- `/docs/` - 主要内容目录 (VitePress 标准)
-  - `index.md` - 主页，包含英雄区域和功能卡片
-  - `blogs/` - 博客文章 markdown 文件
-  - `.vitepress/` - VitePress 配置和主题
-    - `config.ts` - VitePress 主配置文件
-    - `theme/` - 自定义主题实现
-      - `components/` - 自定义苹果风格 Vue 组件
-      - `composables/` - Vue 组合式函数 (通知等)
-      - `style.css` - 全局样式和 CSS 变量
+| 技术 | 用途 |
+|------|------|
+| [VitePress](https://vitepress.dev/) v1.6 | 静态站点生成 |
+| [Vue 3](https://vuejs.org/) | 组件框架 (Composition API) |
+| TypeScript | 配置与类型定义 |
+| [Giscus](https://giscus.app/) | 评论系统 |
+| [Busuanzi](https://busuanzi.ibruce.info/) | 访客统计 |
+| [Bolls.life API](https://bolls.life/) | 圣经经文数据源 |
 
-### 核心技术
-- **VitePress**: 支持 Vue 3 的静态站点生成器
-- **Vue 3**: 使用组合式 API 的组件框架
-- **TypeScript**: 配置和组件类型定义
-- **CSS**: 使用 backdrop-filter 的自定义毛玻璃效果
-- **Giscus**: 评论系统集成
-- **Busuanzi**: 访客统计分析
+## 📁 项目结构
 
-### 自定义组件系统
-网站拥有完整的苹果风格设计系统，位于 `docs/.vitepress/theme/components/`：
-- `AppleCard.vue` - 带毛玻璃效果的主要内容卡片
-- `AppleButton.vue` - 具有悬停效果的交互按钮
-- `AppleNotification.vue` - 弹窗通知系统
-- `AppleModal.vue` - 模态对话框
-- `AppleSearch.vue` - 搜索界面
-- `AppleTabs.vue` - 标签页导航
-- `VisitorPanel.vue` - 统计数据显示
+```
+docs/
+├── index.md                    # 首页（Hero + 功能卡片 + 圣经阅读器）
+├── about.md                    # 关于页
+├── blogs/                      # 博客文章（Markdown）
+│   ├── bible-reading.md
+│   ├── feasts-of-the-lord.md
+│   ├── good-friday.md
+│   ├── passover.md
+│   ├── passover-seder.md
+│   ├── pentecost.md
+│   ├── resource-share.md
+│   └── sunday-school-genesis.md
+├── public/                     # 静态资源
+└── .vitepress/
+    ├── config.ts               # VitePress 配置（自动扫描博客、导航生成）
+    └── theme/
+        ├── Layout.vue          # 自定义布局（圣经阅读器 + Giscus）
+        ├── index.ts            # 主题入口（自动注册组件）
+        ├── style.css           # 全局样式与 CSS 变量
+        └── components/         # Vue 组件
+            ├── BibleReader.vue         # 圣经阅读器（多版本、多语言）
+            ├── bible-data.ts           # 66 卷书数据（书名、章数）
+            ├── AppleCard.vue           # 毛玻璃卡片
+            ├── AppleButton.vue         # 交互按钮
+            ├── AppleBackground.vue     # 背景效果
+            ├── AppleNavEnhancement.vue # 导航栏增强
+            ├── AppleNotification.vue   # 通知弹窗
+            ├── AppleModal.vue          # 模态对话框
+            ├── AppleSearch.vue         # 搜索界面
+            ├── AppleTabs.vue           # 标签页
+            ├── VisitorPanel.vue        # 访客统计面板
+            └── ...                     # 更多组件
+```
 
-### 配置说明
-- **基础 URL**: 设置为 `/blogs` 用于 GitHub Pages 部署
-- **主题**: 默认启用暗色模式，支持明暗切换
-- **国际化**: 中文语言界面 (侧边栏、导航等)
-- **图标**: 使用 `/flag.svg` 作为 favicon
+## 🚀 快速开始
+
+### 环境要求
+
+- [Node.js](https://nodejs.org/) >= 18
+- [pnpm](https://pnpm.io/) >= 8
+
+### 本地开发
+
+```bash
+# 克隆仓库
+git clone https://github.com/ShepherdLoveYou/Bible.git
+cd Bible
+
+# 安装依赖
+pnpm install
+
+# 启动开发服务器（自动打开浏览器）
+pnpm dev
+
+# 构建生产版本
+pnpm build
+
+# 本地预览构建产物
+pnpm preview
+```
+
+### 添加新文章
+
+在 `docs/blogs/` 目录下创建 `.md` 文件即可，侧边栏会自动生成。文件以 `# 标题` 开头：
+
+```markdown
+# 文章标题
+
+正文内容...
+```
+
+文章按 Git 最后提交时间自动排序，最新的排在最前。
+
+## 🌐 部署到 GitHub Pages
+
+本项目已配置 GitHub Actions 自动部署（`.github/workflows/deploy.yml`）：
+
+1. Fork 或克隆此仓库到你的 GitHub 账号
+2. 在仓库 **Settings → Pages** 中将 Source 设置为 **GitHub Actions**
+3. 推送代码到 `main` 分支，会自动触发构建和部署
+4. 访问 `https://<你的用户名>.github.io/<仓库名>/`
+
+> `base` 路径会根据仓库名自动计算，无需手动配置。如果仓库名为 `<用户名>.github.io`，则 base 为 `/`。
+
+## 📖 圣经阅读器
+
+内嵌在首页 Hero 区域右侧，支持：
+
+- **中文版本**: 新标点和合本(简体)、和合本(繁體)、思高圣经
+- **英文版本**: KJV、ESV、NIV、NKJV、NLT、NASB、WEB
+- 66 卷书完整导航（旧约 39 卷 + 新约 27 卷）
+- 章节切换、上一章/下一章快捷按钮
+- 经文数据来自 [Bolls.life](https://bolls.life/) 开放 API
+
+## 📄 License
+
+MIT
 
 ### 内容结构
 - 博客文章位于 `/docs/blogs/`，使用 `.md` 扩展名
